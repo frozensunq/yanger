@@ -26,10 +26,9 @@ var type = {
 
 elements["type"] =
 {
-	default:0,
 	desc: "YANG type",
 	ref: "http://tools.ietf.org/html/rfc6020#page-58",
-	num: 0,
+	uniq:0,
 	subs:
 	[
 		"bit",
@@ -48,8 +47,7 @@ elements["config"] =
 	default: false,
 	desc: "configuration or state data",
 	ref: "http://tools.ietf.org/html/rfc6020#page-105",
-	num: 1,
-	subs: 0
+	uniq:1
 }
 
 elements["status"] =
@@ -57,44 +55,36 @@ elements["status"] =
 	default: "current",
 	desc: "definition status",
 	ref: "http://tools.ietf.org/html/rfc6020#page-105",
-	num: 1,
-	subs: 0
+	uniq:1
 }
 
 elements["description"] =
 {
-	default:0,
 	desc: "description of this definition",
 	ref: "http://tools.ietf.org/html/rfc6020#page-105",
-	num:1,
-	subs:0
+	uniq:1
 }
 
 elements["reference"] =
 {
-	default:0,
 	desc: "reference to this definition",
 	ref: "http://tools.ietf.org/html/rfc6020#page-105",
-	num:1,
-	subs:0
+	uniq:1
 }
 
 elements["when"] =
 {
-	default:0,
 	desc: "make data definition conditional",
 	ref: "http://tools.ietf.org/html/rfc6020#page-106",
-	num:1,
-	subs:0
+	uniq:1
 }
 
 
 elements["module"] =
 {
-	default:0,
 	desc:"defines module",
 	ref: "tools.ietf.org/html/rfc6020#page-38",
-	num:1,
+	uniq:1,
 	subs:
 	[
 		"anyxml",
@@ -128,37 +118,30 @@ elements["module"] =
 
 elements["yang-version"] =
 {
-	default: 0,
 	desc: "specifies which version of the YANG language was used in developing the module",
 	ref: "http://tools.ietf.org/html/rfc6020#page-40",
-	num: 1,
-	subs: 0
+	uniq:1
 }
 
 elements["namespace"] =
 {
-	default: 0,
 	desc: "defines the XML namespace that all identifiers defined by the module are qualified by",
 	ref: "http://tools.ietf.org/html/rfc6020#page-41",
-	num: 1,
-	subs: 0
+	uniq:1
 }
 
 elements["prefix"] =
 {
-	default: 0,
 	desc: "define the prefix associated with the module and its namespace",
 	ref: "http://tools.ietf.org/html/rfc6020#page-41",
-	num: 1,
-	subs: 0
+	uniq:1
 }
 
 elements["import"] =
 {
-	default: 0,
 	desc: "makes definitions from one module available inside another module or submodule",
 	ref: "http://tools.ietf.org/html/rfc6020#page-42",
-	num: 0,
+	uniq:0,
 	subs:
 	[
 		"prefix",
@@ -168,19 +151,17 @@ elements["import"] =
 
 elements["revision-date"] =
 {
-	default: 0,
 	desc: "specify the exact version of the module to import",
 	ref: "http://tools.ietf.org/html/rfc6020#page-41",
-	num: 1,
-	subs: 0
+	uniq:1
 }
 
 elements["include"] =
 {
-	default: 0,
+
 	desc: "make content from a submodule available to that submodule's parent module, or to another submodule of that parent module",
 	ref: "http://tools.ietf.org/html/rfc6020#page-42",
-	num: 0,
+	uniq:0,
 	subs:
 	[
 		"revision-date"
@@ -189,28 +170,26 @@ elements["include"] =
 
 elements["organization"] =
 {
-	default: 0,
+
 	desc: "defines the party responsible for this module",
 	ref: "http://tools.ietf.org/html/rfc6020#page-42",
-	num: 1,
-	subs:0
+	uniq:1
 }
 
 elements["contact"] =
 {
-	default: 0,
+
 	desc: "provides contact information for this module",
 	ref: "http://tools.ietf.org/html/rfc6020#page-42",
-	num: 1,
-	subs:0
+	uniq:1
 }
 
 elements["revision"] =
 {
-	default: 0,
+
 	desc: "specifies the editorial revision history of the module, including the initial revision",
 	ref: "http://tools.ietf.org/html/rfc6020#page-43",
-	num: 1,
+	uniq:1,
 	subs:
 	[
 		"description",
@@ -220,10 +199,10 @@ elements["revision"] =
 
 elements["submodule"] =
 {
-	default: 0,
+
 	desc: "split modules in submodules",
 	ref: "http://tools.ietf.org/html/rfc6020#page-45",
-	num: 0,
+	uniq:0,
 	subs:
 	[
 		"anyxml",
@@ -256,10 +235,10 @@ elements["submodule"] =
 
 elements["belongs-to"] =
 {
-	default: 0,
+
 	desc: "specifies the module to which the submodule belongs",
 	ref: "http://tools.ietf.org/html/rfc6020#page-47",
-	num: 1,
+	uniq:1,
 	subs:
 	[
 		"prefix"
@@ -268,10 +247,10 @@ elements["belongs-to"] =
 
 elements["typedef"] =
 {
-	default: 0,
+
 	desc: "defines a new type that may be used locally in the module, in modules or submodules which include it, and by other modules that import from it",
 	ref: "http://tools.ietf.org/html/rfc6020#page-48",
-	num: 1,
+	uniq:1,
 	subs:
 	[
 		"default",
@@ -285,19 +264,17 @@ elements["typedef"] =
 
 elements["units"] =
 {
-	default:0,
 	desc: "textual definition of the units associated with the type",
 	ref: "http://tools.ietf.org/html/rfc6020#page-49",
-	num:1,
-	subs:0
+	uniq:1
 }
 
 elements["container"] =
 {
-	default:0,
+
 	desc: "defines an interior data node in the schema tree",
 	ref: "http://tools.ietf.org/html/rfc6020#page-50",
-	num:0,
+	uniq:0,
 	subs:
 	[
 		"anyxml",
@@ -322,10 +299,10 @@ elements["container"] =
 
 elements["must"] =
 {
-	default:0,
+
 	desc:"declare a constraint on valid data",
 	ref: "http://tools.ietf.org/html/rfc6020#page-53",
-	num:1,
+	uniq:1,
 	subs:
 	[
 		"description",
@@ -337,37 +314,29 @@ elements["must"] =
 
 elements["error-message"] =
 {
-	default:0,
 	desc:"passed as an error-message tag in the rpc-error",
 	ref: "http://tools.ietf.org/html/rfc6020#page-54",
-	num:1,
-	subs:0
+	uniq:1
 }
 
 elements["error-app-tag"] =
 {
-	default:0,
 	desc:"passed as an error-app-tag in the rpc-error",
 	ref: "http://tools.ietf.org/html/rfc6020#page-54",
-	num:1,
-	subs:0
+	uniq:1
 }
 
 elements["presence"] =
 {
-	default:0,
 	desc:"assigns a meaning to the presence of a container in the data tree",
 	ref: "http://tools.ietf.org/html/rfc6020#page-55",
-	num:1,
-	subs:0
+	uniq:1
 }
 
 elements["leaf"] =
 {
-	default: 0,
 	desc: "defines leaf node",
 	ref: "http://tools.ietf.org/html/rfc6020#page-58",
-	num: 0,
 	subs:
 	[
 		"config",
@@ -386,11 +355,9 @@ elements["leaf"] =
 
 elements["default"] =
 {
-	default: 0,
 	desc: "defines default leaf node value",
 	ref: "http://tools.ietf.org/html/rfc6020#page-58",
-	num: 1,
-	subs:0
+	uniq:1
 }
 
 elements["mandatory"] =
@@ -398,16 +365,14 @@ elements["mandatory"] =
 	default: false,
 	desc: "defines default leaf node value",
 	ref: "http://tools.ietf.org/html/rfc6020#page-58",
-	num: 1,
-	subs:0
+	uniq:1
 }
 
 elements["leaf-lists"] =
 {
-	default:0,
 	desc: "define a simple scalar variable of a particular type",
 	ref: "http://tools.ietf.org/html/rfc6020#page-61",
-	num:0,
+	uniq:0,
 	subs:
 	[
 		"config",
@@ -427,20 +392,16 @@ elements["leaf-lists"] =
 
 elements["min-elements"] =
 {
-	default: 0,
 	desc: "constraint on valid list entries",
 	ref: "http://tools.ietf.org/html/rfc6020#page-62",
-	num: 1,
-	subs:0
+	uniq:1
 }
 
 elements["max-elements"] =
 {
-	default: 0,
 	desc: "constraint on valid list entries",
 	ref: "http://tools.ietf.org/html/rfc6020#page-62",
-	num: 1,
-	subs:0
+	uniq:1
 }
 
 elements["ordered-by"] =
@@ -448,36 +409,45 @@ elements["ordered-by"] =
 	default: "system",
 	desc: "defines whether the order of entries within a list are determined by the user or the system",
 	ref: "http://tools.ietf.org/html/rfc6020#page-63",
-	num: 1,
-	subs:0
+	uniq:1
 }
 
 elements["list"] =
 {
-	default:0,
 	desc: "define an interior data node in the schema tree",
 	ref: "http://tools.ietf.org/html/rfc6020#page-66",
-	num:0,
+	uniq:0,
 	subs:
 	[
+		"anyxml",
+		"choice",
 		"config",
+		"container",
 		"description",
+		"grouping",
 		"if-feature",
+		"key",
+		"leaf",
+		"leaf-list",
+		"list",
 		"max-elements",
 		"min-elements",
 		"must",
 		"ordered-by",
 		"reference",
 		"status",
-		"type",
-		"units",
+		"typedef",
+		"unique",
+		"uses",
 		"when"
 	]
 }
 
 elements["key"] =
 {
-	default:0,
+	desc:"MUST be present if the list represents configuration. Space-separated list of leaf identifiers of this list.",
+	ref: "http://tools.ietf.org/html/rfc6020#page-67",
+	uniq:1
 }
 
 elements["anyxml"] =
@@ -529,6 +499,21 @@ var module = function (type, nameval)
 		return elem
 	}
 
+	this.remove = function(id)
+	{
+		if (!id || self.id == id)
+			return
+
+		for (var i = 0, len = self.subs.length; i < len; i++)
+		{
+			if (self.subs[i].id == id)
+				return self.subs.splice(i,1)
+
+			self.subs[i].remove(id)
+		}
+
+	}
+
 	this.find = function(id)
 	{
 		if (!id)
@@ -537,7 +522,7 @@ var module = function (type, nameval)
 		if (self.id == id)
 			return self
 
-		for (var i=0, len = self.subs.length; i < len; i++)
+		for (var i=0, len=self.subs.length; i < len; i++)
 		{
 			var found = self.subs[i].find(id)
 			if (found)
@@ -568,29 +553,69 @@ function get_completions(type)
 	return elements[type].subs
 }
 
-function create_completion_window(type)
+function create_completion_window(module, type)
 {
 	console.debug("completion for type:" + type)
 
-	var types = get_completions(type)
+	try
+	{
+		elements[type].subs[0]
+	}
+	catch(e)
+	{
+		return console.error("no completions for type")
+	}
 
 	var h = "<div class='completion'><ul>"
-	for (elem in types)
+
+	// ["import", "include", "list"]
+	var type_substatements = elements[type].subs
+
+	// return empty if no elements
+	var completion_elements_count = 0
+	for (var i in type_substatements)
 	{
-		var e = types[elem]
+		// "prefix"
+		var type_substatement_name = type_substatements[i]
+
+		// don't show types which are already added and can't be added twice
+		var skip_if_exists = 0
+		if (typeof module !== "undefined" &&
+			typeof elements[type_substatement_name] !== "undefined" &&
+			typeof elements[type_substatement_name].uniq !== "undefined" &&
+			elements[type_substatement_name].uniq)
+		{
+			for (var i = 0, len = module.subs.length; i < len; i++)
+			{
+				if (module.subs[i].type == type_substatement_name)
+				{
+					skip_if_exists = 1
+					break
+				}
+			}
+		}
+
+		if (skip_if_exists)
+			continue
+
+		completion_elements_count++
 
 		h += "<li>"
-		h += "<a href='#'><span class='small'>" + e + "</span></a>"
+		h += "<a href='#'><span class='small'>" + type_substatement_name + "</span></a>"
 		try
 		{
-			h += " : <span class='small property'>" + elements[e].desc + "</span>"
+			h += " : <span class='small property'>" + elements[type_substatement_name].desc + "</span>"
 		}
 		catch(e)
 		{
 
 		}
+
 		h += "</li>"
 	}
+
+	if (!completion_elements_count)
+		return 0
 
 	h+= "</ul></div>"
 
@@ -623,12 +648,12 @@ function create_dom(m, tab)
 		margin += 0.2
 
 	// 'keyword' 'identifier'
-	h += "<div class='yang' style='margin-left:"+margin+"em' data-id='"+m.id+"' data-name='"+m.name+"' data-type='"+m.type+"' >"
-	h += "<a class='delete' href='#' title='remove'>-</a> "
+	h += "<div class='yang' style='margin-left:"+margin+"em' data-id='"+m.id+"' data-name='"+m.nameval+"' data-type='"+m.type+"' >"
+	h += "<a class='delete invisible' href='#' title='remove'>-</a> "
 	h += "<span class='identifier'>" + m.type + "</span>"
 	h += ' "<span contenteditable="true" class="name editable">' + m.nameval + '</span>"'
 
-	if (!m.subs.length)
+	if (typeof elements[m.type].subs == "undefined" || !elements[m.type].subs.length)
 	{
 		h += "</div>"
 
@@ -637,7 +662,9 @@ function create_dom(m, tab)
 
 	// process substatements
 
-	h += " { <ul>"
+	h += " {"
+	h += "<div style='margin-left:"+margin+"em'>"
+	h += "<ul>"
 
 	for (var sub in m.subs)
 	{
@@ -649,9 +676,11 @@ function create_dom(m, tab)
 	}
 
 	h += "<li>"
-	h += "<a style='margin-left:"+margin+"em' class='add' href='' title='add'>[+]</a> "
+	h += "<a href='#' class='add invisible'>[+]</a> "
 	h += "</li>"
-	h+= "</ul> } <br/><br/>"
+	h += "</ul>"
+	h += "}"
+	h += "</div> <br/><br/>"
 
 	return h
 }

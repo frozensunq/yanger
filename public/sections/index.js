@@ -1,4 +1,4 @@
-var yang_root = new module("module", "example")
+var yang_root = new yang.statement("module", "example")
 
 $(function()
 {
@@ -17,51 +17,49 @@ $(function()
 // add new element
 $("#content_right").on("click", "div.completion li", function()
 {
-	var self = $(this).find('a')
+	var self = $(this).find('a span._name')
 
 	// elem name we want to create i.e "import"
-	var target_elem = self.text()
+	var yang_statement_name = self.text()
+	var yang_statement_id = self.closest('div.yang').data('id')
 
-	if (target_elem in elements)
+	if (yang_statement_name in yang.statements)
 	{
-		var e = elements[target_elem]
+		var yang_statement = yang.statements[yang_statement_name]
 
-		var p = yang_root.find_from_dom(self)
+		var yang_module = yang_root.find(yang_statement_id)
 
-		// parent element in which we want to add newly created element
-		console.log("parent:" + p.nameval)
-
-		if (typeof e.default == "undefined")
-			p.add(target_elem, target_elem)
+		var yang_module_new = null
+		if (typeof yang_statement.default === "undefined")
+			yang_module_new = yang_module.add(yang_statement_name, yang_statement_name)
 		else
-			p.add(target_elem, e.default)
+			yang_module_new = yang_module.add(yang_statement_name, yang_statement.default)
 
-		$("#d_index").html(create_dom(yang_root, 0))
+		remove_completion_window()
+
+		$("#d_index").find("div[data-id='"+yang_module.id+"'] ul[data-statements] > li:last").before(create_dom(yang_module_new, 0))
 	}
-
-	return false
-
 })
 
 // completion for adding
 $("#content_right").on("mouseenter", "a.add", function()
 {
-	// remove existing window if exists
-	$('div.completion').each(function(){$(this).remove()})
+	remove_completion_window()
 
 	var self = $(this)
-	var self_root = yang_root.find_from_dom(self)
-	var type = self_root.type
+	var yang_statement_id = self.closest('div.yang').data('id')
+	var yang_statement = yang_root.find(yang_statement_id)
+	var type = yang_statement.type
 
 	var w = self.width();
 	var h = self.height();
 	var pos = self.offset();
 
-	var html = create_completion_window(self_root, type)
+	var html = create_completion_window(yang_statement, type)
 	if (!html)
 		return false
 
-	html.css({"position" : "absolute", left:pos.left-html.width(), top:(pos.top), padding: "1em"})
+	html.css({"position" : "absolute", left: pos.left - html.width(), top:(pos.top), padding: "1em"})
 
 	self.append(html)
 
@@ -96,3 +94,9 @@ $("#content_right").on("mouseleave", "div.yang", function()
 	$(this).find("a.delete:first").css("visibility", "hidden")
 	$(this).find("a.add:last").css("visibility", "hidden")
 })
+
+function remove_completion_window()
+{
+	// remove existing completion window if exists
+	$('div.completion').each(function(){$(this).remove()})
+}

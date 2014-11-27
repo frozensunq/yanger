@@ -13,16 +13,24 @@ ul {
 	margin-bottom: 1em;
 	margin-left:1em
 }
+
+h4 {
+	font-weight:bold;
+}
+
 li {
 	margin:0px;
 	padding:0px
 }
+
 span.identifier {
 	font-weight:bold
 }
+
 span.name {
 	color:black
 }
+
 span.property {
 	color:grey
 }
@@ -36,12 +44,14 @@ span.small {
 	border: 1px solid #EEEEEE;
 	display:inline-block;
 }
+
 a.add, a.delete{
 	font-weight:bold;
 	font-size:2.0em;
 	vertical-align: -10%;
 	text-decoration: none;
 }
+
 a.add {
 	font-size: 1.0em
 
@@ -51,6 +61,17 @@ a.add {
 	background-color : #EFEFEF
 }
 
+#d_editor {
+	width: 50%;
+	float:left
+}
+#d_output {
+	border: 1px solid #EFEFEF;
+	float:left;
+	width:48%;
+	margin: 0% 1%;
+	padding: 1%;
+}
 
 #i_spinner
 {

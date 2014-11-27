@@ -19,7 +19,7 @@ $(function()
 	if(location.hash)
 		process_action(location.hash);
 	else
-		location.hash="#index";
+		location.hash="#editor";
 
 	// open on click changes hash link or forces open of same tab
 	$("#ul_links").on("click","a",function()

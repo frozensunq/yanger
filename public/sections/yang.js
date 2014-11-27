@@ -9,20 +9,40 @@ var yang = new function()
 		this.type = type
 		this.nameval = nameval
 		this.id = yang._ID++
+		this.parent = 0
 
 		this.subs = []
 	}
 
 	// add new substatement
-	statement.prototype.add = function(type, nameval)
+	//@type: statement type
+	//@nameval: statement name/value
+	//@id: optional, substatement id after which to add element
+	statement.prototype.add = function(type, nameval, id)
 	{
 		if (typeof type == "undefined" || typeof nameval == "undefined")
 		{
-			return console.error(util.format("[statement:add] error: nameval=%s type=%s", nameval, type))
+			return console.error("[statement:add] error: nameval="+nameval+" type="+type)
 		}
 
 		var elem = new yang.statement(type, nameval)
-		this.subs.push(elem)
+		elem.parent = this
+
+		if (id)
+		{
+			for (var i = 0, len = this.subs.length; i < len; i++)
+			{
+				if (this.subs[i].id == id)
+				{
+					this.subs.splice(i+1, 0, elem)
+					break
+				}
+			}
+		}
+		else
+		{
+			this.subs.push(elem)
+		}
 
 		return elem
 	}
@@ -49,7 +69,7 @@ var yang = new function()
 	{
 		if (!id)
 		{
-			return console.error(util.format("[statement:find] error: id=%s", id))
+			return console.error("[statement:find] error: id="+id)
 		}
 
 		if (this.id == id)
@@ -63,6 +83,32 @@ var yang = new function()
 		}
 
 		return 0
+	}
+
+	// move subelement from index to index by from/to subelement id
+	statement.prototype.move = function(from_id, to_id)
+	{
+		var from_index = to_index = -1
+		for (var i = 0, len = this.subs.length; i < len; i++)
+		{
+			if (this.subs[i].id == from_id)
+			{
+				from_index = i
+			}
+			else
+			if (this.subs[i].id == to_id)
+			{
+				to_index = i
+			}
+		}
+
+		if (to_index == -1 || from_index == -1)
+			return
+
+		console.debug("from index:" + from_index)
+		console.debug("to index:" + to_index)
+
+		this.subs.splice(to_index, 0, this.subs.splice(from_index, 1)[0])
 	}
 
 	var statements = this.statements =
@@ -650,139 +696,5 @@ var yang = new function()
 		}
 	}
 
-}
-
-function create_completion_window(statement, type)
-{
-	console.debug("completion for type:" + type)
-
-	try
-	{
-		yang.statements[type].subs[0]
-	}
-	catch(e)
-	{
-		return console.error("no completions for type")
-	}
-
-	var h = "<div class='completion'><ul>"
-
-	// ["import", "include", "list"]
-	var type_substatements = yang.statements[type].subs
-
-	// return empty if no elements
-	var completion_elements_count = 0
-	for (var i in type_substatements)
-	{
-		// "prefix"
-		var type_substatement_name = type_substatements[i]
-
-		// don't show types which are already added and can't be added twice
-		var skip_if_exists = 0
-		if (typeof statement !== "undefined" &&
-			typeof yang.statements[type_substatement_name] !== "undefined" &&
-			typeof yang.statements[type_substatement_name].uniq !== "undefined" &&
-			yang.statements[type_substatement_name].uniq)
-		{
-			for (var i = 0, len = statement.subs.length; i < len; i++)
-			{
-				if (statement.subs[i].type == type_substatement_name)
-				{
-					skip_if_exists = 1
-					break
-				}
-			}
-		}
-
-		if (skip_if_exists)
-			continue
-
-		completion_elements_count++
-
-		h += "<li>"
-		h += "<a href='#'><span class='small _name'>" + type_substatement_name + "</span></a>"
-		try
-		{
-			h += " : <span class='small property'>" + yang.statements[type_substatement_name].desc + "</span>"
-		}
-		catch(e)
-		{
-
-		}
-
-		h += "</li>"
-	}
-
-	if (!completion_elements_count)
-		return 0
-
-	h+= "</ul></div>"
-
-	return $(h)
-}
-
-/*
- * http://tools.ietf.org/html/rfc6020#page-143
- *
- * general structure:
- *
- * 'keyword' 'identifier' {
-		'keyword' 'identifier'
-		'keyword' 'identifier'
-		'keyword' 'identifier' {
-			'keyword' identifier
-			...
-		}
- * }
- *
- * @module: yang statement module
- * @tab: level of indentation
- */
-
-function create_dom(m)
-{
-	var h = ""
-
-	// 'keyword' 'identifier'
-	h += "<div class='yang' data-id='"+m.id+"' data-name='"+m.nameval+"' data-type='"+m.type+"' >"
-	h += "<a class='delete invisible' href='#' title='remove'>-</a> "
-	h += "<span class='identifier'>" + m.type + "</span>"
-	h += ' "<span contenteditable="true" class="name editable">' + m.nameval + '</span>"'
-
-	// there are no possible substatements close tag
-	if (typeof yang.statements[m.type].subs == "undefined" || !yang.statements[m.type].subs.length)
-	{
-		return h += "</div>"
-	}
-
-	//if there are no existing substatements only show add option
-	/* TODO: when removing elements we need to replace parent structure too if no substatements left
-	if (!m.subs.length)
-	return h+= " { <a href='#' class='add invisible'>[+]</a> } </div> "
-	*/
-
-	// process substatements
-
-	h += " {"
-	h += "<div style='margin-left:1em'>"
-	h += "<ul data-statements>"
-
-	for (var sub in m.subs)
-	{
-		var prop=m.subs[sub]
-
-		h += "<li class='property'>"
-		h += create_dom(prop)
-		h += "</li>"
-	}
-
-	h += "<li>"
-	h += "<a href='#' class='add invisible'>[+]</a>"
-	h += "</li>"
-	h += "</ul>"
-	h += "}"
-	h += "</div>"
-
-	return h
 }
 

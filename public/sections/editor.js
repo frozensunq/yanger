@@ -15,19 +15,28 @@ var yang_root = new yang.statement("module", "example")
 
 $(function()
 {
-	yang_root.add("description", "example yang module")
-	yang_root.add("contact", "petar koretic @ sartura.hr")
-	yang_root.add("revision", "2014-20-11 v1")
-
-	var i = yang_root.add("include", "ietf-types")
+	yang_root.add("namespace", "urn:ietf:params:xml:ns:yang:example")
+	yang_root.add("prefix", "ie")
 
 	var i = yang_root.add("import", "ietf-inet-types")
-	i.add("revision-date", "2014-02-02")
+	i.add("prefix", "inet")
+
+	yang_root.add("description", "example yang module")
+	yang_root.add("contact", "petar.koretic@sartura.hr")
+	yang_root.add("revision", "2014-12-15")
+
 
 	$("#d_editor").html(create_dom_statement(yang_root))
+	$("#d_options a").each(function()
+	{
+		$(this).tooltip()
+	})
 })
 
-// add new element
+/*
+ * add new element
+ */
+
 $("#d_editor").on("click", ".completion li", function()
 {
 	var self = $(this).find('a span._name')
@@ -56,7 +65,10 @@ $("#d_editor").on("click", ".completion li", function()
 	return false
 })
 
-// completion for adding
+/*
+ * show completion window
+ */
+
 $("#d_editor").on("mouseenter", "a.add", function()
 {
 	remove_completion_window()
@@ -75,17 +87,47 @@ $("#d_editor").on("mouseenter", "a.add", function()
 
 	html.css({"position" : "absolute", left: pos.left - html.width(), top:(pos.top), padding: "1em"})
 
-	self.append(html)
+	// completion filter field
+	var completion_field = self.append(html).find("#icompletion");
+	completion_field.focus()
+
+	completion_field.on('keyup', function()
+	{
+		var input_text = completion_field.val().trim()
+
+		completion_field.closest("div.completion").find('li').each(function()
+		{
+			var self = $(this)
+			var matched_text = self.text().trim()
+
+			if (matched_text.indexOf(input_text) !== -1)
+			{
+				self.show()
+			}
+			else
+			{
+				self.hide()
+			}
+		})
+	})
 
 	return false;
 })
 
+/*
+ * remove completion window
+ */
+
+
 $("#d_editor").on("mouseleave", "div.completion", function()
 {
-	$(this).remove()
+	remove_completion_window()
 })
 
-// remove element
+/*
+ * remove substatement
+ */
+
 $("#d_editor").on("click", "a.delete", function()
 {
 	var self = $(this)
@@ -98,7 +140,10 @@ $("#d_editor").on("click", "a.delete", function()
 	return false;
 })
 
-// show/hide [+] -
+/*
+ * show/hide substatements [+] -
+ */
+
 $("#d_editor").on("mouseenter", "div.yang", function()
 {
 	$(this).find("a.delete:first").css("visibility", "visible")
@@ -110,7 +155,10 @@ $("#d_editor").on("mouseleave", "div.yang", function()
 	$(this).find("a.add:last").css("visibility", "hidden")
 })
 
-// draging/reordering elements
+/*
+ * draging/reordering elements
+ */
+
 $("#d_editor").on("dragstart", "div.yang", function(e)
 {
 	e.stopPropagation()
@@ -180,6 +228,58 @@ $("#d_editor").on("drop", "div.yang", function(e)
 	return false
 })
 
+/*
+ * [ACTIONS]
+ */
+
+$("#d_options").on("click", "#a_validate", function()
+{
+	generate_yang(function(data)
+	{
+		console.log(data.yang)
+	})
+
+	return false
+})
+$("#d_options").on("click", "#a_save", function()
+{
+	generate_yang(function(data)
+	{
+		$("#d_output").html("<div>" + data.error+ "<hr/></div>" + "<div>"+data.yang.replace(/\n/g, "<br/>") + "</div>")
+		console.log(data.yang)
+	})
+
+	return false
+})
+
+
+/*
+ *
+ * Javascript functions
+ *
+ */
+
+
+function generate_yang(callback)
+{
+	if (!callback)
+		return
+
+	var yang_module_name = yang_root.nameval
+	if (!yang_module_name)
+	{
+		return console.error("no module")
+	}
+
+	var yang_module_content = get_yang_from_dom($("#d_editor"))
+
+	$.post("./yang_process", {"yang_module_name" : yang_module_name, "yang_module_content" : yang_module_content }, function(response)
+	{
+		callback(response)
+
+	},"JSON")
+
+}
 function remove_completion_window()
 {
 	// remove existing completion window if exists
@@ -189,7 +289,6 @@ function remove_completion_window()
 function create_completion_window(statement)
 {
 	console.debug("completion for type:" + statement.type)
-	console.debug("parent:" + statement.nameval)
 
 	try
 	{
@@ -200,7 +299,9 @@ function create_completion_window(statement)
 		return console.error("no completions for type")
 	}
 
-	var h = "<div class='completion'><ul>"
+	var h = "<div class='completion'>"
+		h += "<input id='icompletion' type='text' placeholder='filter'/>"
+		h += "<ul>"
 
 	// ["import", "include", "list"]
 	var type_substatements = yang.statements[statement.type].subs
@@ -280,18 +381,18 @@ function create_dom_statement(m)
 	// 'keyword' 'identifier'
 	h += "<div draggable='true' class='yang' data-id='"+m.id+"' data-name='"+m.nameval+"' data-type='"+m.type+"' >"
 	h += "<a class='delete invisible' href='#' title='remove'>-</a> "
-	h += "<span class='identifier'>" + m.type + "</span>"
-	h += ' "<span contenteditable="true" class="name editable">' + m.nameval + '</span>"'
+	h += "<span class='identifier collectable'>" + m.type + "</span>"
+	h += ' "<span contenteditable="true" class="nameval collectable editable">' + m.nameval + '</span>"'
 
 	// there are no possible substatements close tag
 	if (typeof yang.statements[m.type].subs == "undefined" || !yang.statements[m.type].subs.length)
 	{
-		return h += "</div>"
+		return h += "<span class='collectable'>;</span></div>"
 	}
 
 	// process substatements
 
-	h += " {"
+	h += " <span class='collectable'>{</span>"
 	h += "<div style='margin-left:1em'>"
 	h += "<ul data-statements class='sortable'>"
 
@@ -308,7 +409,7 @@ function create_dom_statement(m)
 	h += "<a href='#' class='add invisible'>[+]</a>"
 	h += "</li>"
 	h += "</ul>"
-	h += "}"
+	h += "<span class='collectable'>}</span>"
 	h += "</div>"
 
 	return h
@@ -317,4 +418,19 @@ function create_dom_statement(m)
 function get_id_from_dom(elem)
 {
 	return elem.closest('div.yang').data('id')
+}
+
+function get_yang_from_dom(elem)
+{
+	var yang_string = ''
+	elem.find('.collectable').each(function()
+	{
+		var self = $(this)
+		var raw_text = self.text().trim()
+
+		yang_string += self.hasClass('nameval') ? '"' + raw_text + '"' : raw_text
+		yang_string += " "
+	})
+
+	return yang_string
 }

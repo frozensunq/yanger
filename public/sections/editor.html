@@ -1,13 +1,46 @@
+<div id="d_options">
+	<span class="dropdown">
+
+		<a href='#' class="btn btn-primary btn-xs dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+			<span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+			New
+			<span class="caret"></span>
+		</a>
+		<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+			<li role="presentation"><a id="new_module" role="menuitem" tabindex="-1" href="#">Module</a></li>
+			<li role="presentation"><a id="new_submodule" role="menuitem" tabindex="-1" href="#">Submodule</a></li>
+		</ul>
+	</span>
+
+	<a href='#' id="a_save" class="btn btn-primary btn-xs" data-toggle="tooltip" title="Save to clipboard">
+		<span class="glyphicon glyphicon-save"></span>
+		Save
+	</a>
+
+	<span class="dropdown">
+		<a href='#' class="btn btn-primary btn-xs dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-expanded="true">
+			<span class="glyphicon glyphicon-export" aria-hidden="true"></span>
+			Export
+			<span class="caret"></span>
+		</a>
+		<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
+			<li role="presentation"><a id="to_clipboard" role="menuitem" tabindex="-1" href="#">To clipboard</a></li>
+		</ul>
+	</span>
+
+	<a href='#' class="btn btn-primary btn-xs">
+		<span class="glyphicon glyphicon-export"></span>
+		Validate
+	</a>
+</div>
+<hr/>
 <div id="d_editor">
 </div>
 <div id="d_output">
 	<div>
-		<input type="button" value="export" class="btn btn-primary btn-xs"/>
-		<input type="button" value="validate" class="btn btn-primary btn-xs"/>
+	<h4>Validation</h4>
 	<hr/>
 	</div>
-
-	<h4>Validation</h4>
 </div>
 
 <script src="sections/yang.js"></script>

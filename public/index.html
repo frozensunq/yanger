@@ -73,6 +73,17 @@
 
 		<div id="d_options">
 
+			<a href='#' id="a_files" class="btn btn-default btn-xs" data-toggle="tooltip" title="Manage your yang files">
+				<span class="glyphicon glyphicon-th-list"></span>
+				Files
+			</a>
+
+			<div class="modal fade files-modal" tabindex="-1" role="dialog" aria-hidden="true">
+				<div class="modal-dialog modal-lg">
+					<div class="modal-content"></div>
+				</div>
+			</div>
+
 			<span class="dropdown">
 
 				<a href='#' class="btn btn-primary btn-xs dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
@@ -98,14 +109,16 @@
 					<span class="caret"></span>
 				</a>
 				<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
-					<li role="presentation"><a id="to_clipboard" role="menuitem" tabindex="-1" href="#">To clipboard</a></li>
+					<li role="presentation"><a id="a_export_to_clipboard" role="menuitem" tabindex="-1" href="#">To clipboard</a></li>
 				</ul>
 			</span>
 
-			<a href='#' id="a_save" class="btn btn-primary btn-xs" data-toggle="tooltip" title="Save to clipboard">
+			<a href='#' id="a_save" class="btn btn-primary btn-xs" data-toggle="tooltip" title="Save changes">
 				<span class="glyphicon glyphicon-save"></span>
 				Save
 			</a>
+
+			<img id="i_spinner" src="img/spinner.gif" />
 
 		</div>
 
@@ -128,6 +141,7 @@
 
 	<script src="js/jquery.js"></script>
 	<script src="js/sha256.js"></script>
+	<script src="js/ZeroClipboard.min.js"></script>
 	<script src="js/bootstrap.js"></script>
 	<script src="js/json2.js"></script>
 	<script src="js/jstorage.js"></script>

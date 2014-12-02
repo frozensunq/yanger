@@ -31,7 +31,9 @@ var response = function(error, data)
 
 function user_is_valid(username, userpass_hash)
 {
-	if (username.length < 4 ||
+	if (!username ||
+		!userpass_hash ||
+		username.length < 4 ||
 		username.length > 20 ||
 		userpass_hash.length !== 64 ||
 		new RegExp(/^[a-zA-Z0-9]+$/).test(username) === false ||
@@ -56,6 +58,9 @@ function uniq_n(username, userpass_hash)
 
 function identifier_valid(identifier)
 {
+	if (!identifier)
+		return false
+
 	return new RegExp(/([A-z]|'_')+([A-z0-9]|\_|\-|\.)*/).test(identifier)
 }
 
@@ -63,32 +68,35 @@ function identifier_valid(identifier)
  * save yang content to database for user
  */
 
-app.put("/yang", function(req, res)
+app.put("/yang/:username/:userpass_hash/:yang_module_name", function(req, res)
 {
 	var username = req.param('username')
 	var userpass_hash = req.param('userpass_hash')
+	var yang_module_name = req.param('yang_module_name')
+	var yang_module_content = req.param('yang_module_content')
 
-	var db = levelup(leveldb_dir + uniq_n(username, userpass_hash))
+	if (!user_is_valid(username, userpass_hash))
+		return res.end(response("invalid username or password"))
 
-	db.put('name', 'LevelUP', function (error)
+	if (!identifier_valid(yang_module_name))
+		return res.end(response("invalid yang module name"))
+
+	if (!yang_module_content || yang_module_content.length < 10)
+		return res.end(response("invalid yang module content"))
+
+	var db = levelup(leveldb_dir + uniq_n(username, userpass_hash), function(error, db)
 	{
 		if (error)
+			return res.end(response(error.toString()))
+
+		db.put(yang_module_name, yang_module_content, function (error)
 		{
 			db.close()
 
-			return console.log('Ooops!', error) // some kind of I/O error
-		}
+			if (error)
+				return res.end(response(error.toString()))
 
-		db.get('name', function (err, value)
-		{
-			db.close()
-
-			if (err)
-			{
-				return console.log('Ooops!', err)
-			}
-
-			console.log('name=' + value)
+			return res.end(response())
 		})
 	})
 })
@@ -97,14 +105,72 @@ app.put("/yang", function(req, res)
  * get yang content from database for user
  */
 
-app.get("/yang/:username/:userpass_hash/:yang_module_name", function(req, res)
+app.get("/yang/:username/:userpass_hash/:yang_module_name?", function(req, res)
 {
 	var username = req.param('username')
 	var userpass_hash = req.param('userpass_hash')
 	var yang_module_name = req.param('yang_module_name')
 
 	console.log("req username:" + username)
-	console.log("req yang module name:" + yang_module_name)
+
+	if (!user_is_valid(username, userpass_hash))
+		return res.end(response("invalid username or password"))
+
+	var db = levelup(leveldb_dir + uniq_n(username, userpass_hash), function(error, db)
+	{
+		if (error)
+			return res.end(response(error.toString()))
+
+		if (yang_module_name)
+		{
+			console.log('requesting specific yang module')
+			console.log("yang module name:" + yang_module_name)
+			db.get(yang_module_name, function(error, value)
+			{
+				db.close()
+
+				if (error)
+					return res.end(response(error.toString()))
+
+				res.end(response(null, value))
+			})
+		}
+		else
+		{
+			console.log("requesting all modules for user")
+
+			var keys = []
+
+			db.createReadStream({values:false})
+			.on('data', function (key)
+			{
+				keys.push(key)
+			})
+			.on('error', function (error)
+			{
+				console.log("database error:", error)
+				db.close()
+			})
+			.on('end', function () {
+				console.log('Stream end')
+
+				res.end(response(null, keys))
+			})
+			.on('close', function ()
+			{
+				console.log('stream closed')
+				db.close()
+			})
+		}
+	})
+
+})
+
+app.delete("/yang/:username/:userpass_hash/:yang_module_name", function(req, res)
+{
+	var username = req.param('username')
+	var userpass_hash = req.param('userpass_hash')
+	var yang_module_name = req.param('yang_module_name')
 
 	if (!user_is_valid(username, userpass_hash))
 		return res.end(response("invalid username or password"))
@@ -112,20 +178,23 @@ app.get("/yang/:username/:userpass_hash/:yang_module_name", function(req, res)
 	if (!identifier_valid(yang_module_name))
 		return res.end(response("invalid yang module name"))
 
-	var db = levelup(leveldb_dir + uniq_n(username, userpass_hash))
-
-	db.get(yang_module_name, function(e, value)
+	var db = levelup(leveldb_dir + uniq_n(username, userpass_hash), function(error, db)
 	{
-		db.close()
+		if (error)
+			return res.end(response(error.toString()))
 
-		if (e)
+		db.del(yang_module_name, function(error)
 		{
-			return res.end(response(e.toString()))
-		}
+			db.close()
 
-		res.end(response(null, value))
+			if (error)
+				return res.end(response(error.toString()))
+
+			res.end(response())
+		})
 	})
 })
+
 
 /*
  * create and validate yang module using pyang
@@ -133,14 +202,17 @@ app.get("/yang/:username/:userpass_hash/:yang_module_name", function(req, res)
  * file name must match yang module name
  * we create directory per user and save modules there
  *
+ * @output: specifies if we should return generated yang module
  */
 
-app.post("/yang_process", function(req, res)
+app.post("/yang_validate/:output?", function(req, res)
 {
 	var username = req.body.username
 	var userpass_hash = req.body.userpass_hash
 	var yang_module_name = req.body.yang_module_name
 	var yang_module_content = req.body.yang_module_content
+	var output = req.param('output')
+
 
 	if (!user_is_valid(username, userpass_hash))
 		return res.end(response("invalid username or password"))
@@ -169,13 +241,11 @@ app.post("/yang_process", function(req, res)
 		fs.writeFile(file_path, yang_module_content, function (error)
 		{
 			if (error)
-			{
 				return res.end(response(error))
-			}
 
 			exec('pyang', ['-f', 'yang', file_path], function(error, stdout, stderr)
 			{
-				res.end(response(error || stderr, stdout))
+				res.end(response(error || stderr, output ? stdout : ''))
 			})
 		})
 	})

@@ -27,10 +27,11 @@ $(function()
 
 
 	$("#d_editor").html(create_dom_statement(yang_root))
-	$("#d_options a").each(function()
+	$("#d_options a[data-toggle='tooltip']").each(function()
 	{
 		$(this).tooltip()
 	})
+
 })
 
 /*
@@ -150,6 +151,21 @@ $("#d_editor").on("click", "a.delete", function()
 })
 
 /*
+ * update editable structure nameval on change
+ */
+
+$("#d_editor").on('blur input','.editable', function()
+{
+	var self = $(this)
+	var nameval = self.text().trim()
+
+	var yang_statement_id = get_id_from_dom(self)
+	var yang_statement = yang_root.find(yang_statement_id)
+
+	yang_statement.nameval = nameval
+})
+
+/*
  * show/hide substatements [+] -
  */
 
@@ -240,69 +256,196 @@ $("#d_editor").on("drop", "div.yang", function(e)
 /*
  * [ACTIONS]
  */
+$("#d_options").on("click", "#a_files", function()
+{
+	loading(1)
+
+	var $files = $(".files-modal")
+	get_yang_list(function(html)
+	{
+		loading(0)
+
+		$files.find('.modal-content').html(html)
+		$files.modal('show')
+	})
+
+	return false
+})
+
 
 $("#d_options").on("click", "#a_validate", function()
 {
-	generate_yang(function(response)
+	var user_data = get_userdata()
+
+	loading(1)
+	generate_yang(user_data, function(response)
 	{
-		$("#d_output").html("<div>" + response.error + "<hr/></div>" + "<div>"+response.data.replace(/\n/g, "<br/>").replace(/ /g, '&nbsp;') + "</div>")
-		console.log(response.data)
+		loading(0)
+		if (!response)
+			return
+
+		$("#d_output").html("<div>" + response.error + "<hr/></div>")
 	})
 
 	return false
 })
+
+
 $("#d_options").on("click", "#a_save", function()
 {
-	generate_yang(function(data)
+	var user_data = get_userdata()
+	if (!user_data)
+		return $("<span> Please login to be able to use advanced features </span>").csInfo('cs-gradient-red')
+
+	var yang_module_name = yang_root.nameval
+
+	if (!yang_module_name)
+		return $("<span> No existing module </span>").csInfo('cs-gradient-red')
+
+	for (var i = 0, len = yang_root.subs.length; i < len; i++ )
 	{
-		$("#d_output").html("<div>" + response.error + "<hr/></div>" + "<div>"+response.data.replace(/\n/g, "<br/>").replace(/ /g, '&nbsp;') + "</div>")
-		console.log(response.data)
+		var submodule = yang_root.subs[i]
+		if (submodule.type == "revision")
+		{
+			console.log(submodule.nameval)
+			yang_module_name += "@" + submodule.nameval
+			break
+		}
+	}
+
+	yang_module_name += ".yang"
+
+	var yang_module_content = get_yang_from_dom($("#d_editor"))
+	if (!yang_module_content)
+		return console.error("no module content")
+
+	loading(1)
+	$.ajax
+	({
+		type: 'PUT',
+		url: '/yang/' + user_data.user + "/" + user_data.pass + "/" + yang_module_name,
+		data: {"yang_module_content" : yang_module_content},
+		success: function(response)
+		{
+			loading(0)
+
+			if (response.error)
+				return $("<span>" + response.error +"</span>").csInfo('cs-gradient-red')
+
+			$("<span> saved </span>").csInfo()
+		},
+		error: function(error)
+		{
+			loading(0)
+
+			if (response.error)
+				return $("<span>" + error +"</span>").csInfo('cs-gradient-red')
+		}
 	})
 
 	return false
 })
 
+/*
+ * copy yang content to clipboard
+ */
+
+$("#d_options").on('click', '#a_export_to_clipboard', function()
+{
+	console.log("clicked")
+
+	var self = document.getElementById('a_export_to_clibpoard')
+	var client = new ZeroClipboard()
+
+	  client.on( 'ready', function(event) {
+         console.log( 'movie is loaded' );
+
+        client.on( 'copy', function(event) {
+          event.clipboardData.setData('text/plain', event.target.innerHTML);
+        } );
+
+        client.on( 'aftercopy', function(event) {
+          console.log('Copied text to clipboard: ' + event.data['text/plain']);
+        } );
+      } );
+
+      client.on( 'error', function(event) {
+         console.log( 'ZeroClipboard error of type "' + event.name + '": ' + event.message );
+        ZeroClipboard.destroy();
+      } );
+
+	var user_data = get_userdata()
+
+	loading(1)
+	generate_yang(user_data, function(response)
+	{
+		loading(0)
+
+		console.log(response)
+
+		if (!response || !response.data)
+			return $('<span>yang generation failed</span>').csInfo('cs-gradient-red')
+
+		client.setData('text/plain', response.data)
+
+		$('<span>yang copied to clipboard</span>').csInfo()
+
+	}, true)
+
+	return false
+})
 
 /*
  *
  * Javascript functions
  *
+ * @user_data: username and userpass hash
+ * @callback: called when yang is validate with response from server
+ * @output: do we want server to reply us back generated yang content
  */
 
-
-function generate_yang(callback)
+function generate_yang(user_data, callback, output)
 {
 	if (!callback)
-		return
+		return console.error("generate yang: no callback")
 
-	var user_data = get_userdata()
 	if (!user_data)
 		return $("<span> Please login to be able to use advanced features </span>").csInfo('cs-gradient-red')
 
-
 	var yang_module_name = yang_root.nameval
 	if (!yang_module_name)
-	{
 		return console.error("no module")
-	}
 
 	console.log(user_data)
 
 	var yang_module_content = get_yang_from_dom($("#d_editor"))
 
-	$.post("./yang_process", {"username" : user_data.user, "userpass_hash" : user_data.pass, "yang_module_name" : yang_module_name, "yang_module_content" : yang_module_content }, function(response)
-	{
-		response.error && (response.error = response.error.substr(response.error.lastIndexOf('/') +1))
-
-		callback(response)
-
-	},"JSON")
-
+	$.ajax(
+    {
+        type: 'POST',
+        url: '/yang_validate/' + (output ? output : ''),
+        dataType: 'json',
+		data : {"username" : user_data.user, "userpass_hash" : user_data.pass, "yang_module_name" : yang_module_name, "yang_module_content" : yang_module_content},
+        success: function(response)
+        {
+			response.error && (response.error = response.error.substr(response.error.lastIndexOf('/') +1))
+			callback(response)
+        },
+        error: function(error)
+        {
+            console.error(error)
+			callback()
+        }
+    })
 }
 function remove_completion_window()
 {
 	// remove existing completion window if exists
-	$('div.completion').each(function(){$(this).remove()})
+	$('div.completion').each(function()
+	{
+		var self = $(this)
+		if (self) self.remove()
+	})
 }
 
 function create_completion_window(statement)
@@ -456,4 +599,76 @@ function get_yang_from_dom(elem)
 	})
 
 	return yang_string
+}
+
+function get_yang_list(callback)
+{
+	var user_data = get_userdata()
+	if (!user_data)
+		return
+
+	var h = '<h4>Yang modules</h4><hr/>'
+
+	h += '<table class="files"><tr><th>Name</th><th>Actions</th></tr>'
+
+	$.getJSON('/yang/' + user_data.user + "/" + user_data.pass,
+	function(response)
+	{
+		if (!response || response.error || !response.data || !Array.isArray(response.data))
+			return console.error(response)
+
+		for (var i = 0, len = response.data.length; i < len; i++)
+		{
+			var yang_file = response.data[i]
+			h += "<tr>"
+			h += '<td data-module-name><span>' + yang_file + '</span></td>'
+			h += '<td>\
+			<a href="#" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-ok"></span> Use</a> \
+			<a href="#" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-remove"></span> Remove</a>'
+			h += '<td>'
+			h += "</tr>"
+		}
+
+		h += "</table>"
+
+		$h = $(h)
+		$h.on('click', '.btn-default', function()
+		{
+
+			return false
+		})
+
+		$h.on('click', '.btn-danger', function()
+		{
+			var self = $(this)
+			if (!confirm("This can't be reverted. Are you sure?"))
+				return
+
+			var user_data = get_userdata()
+			var yang_module_name = self.closest('tr').find('[data-module-name]').text()
+
+			$.ajax(
+            {
+                type: 'DELETE',
+                url: '/yang/' + user_data.user + "/" + user_data.pass + "/" + yang_module_name,
+                dataType: 'json',
+                success: function(result)
+                {
+                    if (!result.error)
+                    {
+                        self.closest('tr').remove()
+                    }
+                },
+                error: function(error)
+                {
+                    console.error(error)
+                }
+            });
+
+			return false
+		})
+
+		callback && callback($h)
+	})
+
 }

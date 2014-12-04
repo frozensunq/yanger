@@ -80,31 +80,25 @@ function show_success(msg)
 	loading(0)
 }
 
-function show_error(msg, details)
+function show_modal(title, html, footer)
 {
-	if (details)
-		msg += "<br/><hr/><strong>Error details:<br/></br></strong>" + details;
+	title = title || ''
+	html = html || ''
+	footer = footer || ''
 
-	var ref = $("#d_modal_info")
-	ref.find("h4").html("<span class='glyphicon glyphicon-exclamation-sign'>Error</span>");
-	ref.find(".modal-body").html(msg)
+	var ref = $("#d_modal")
+	ref.find('.modal-title').html(title)
+	ref.find(".modal-body").html(html)
+
+	var $footer = ref.find(".modal-footer")
+	footer && $footer.html(footer).show() || $footer.hide()
+
 	ref.modal()
-	loading(0)
 }
 
-function show_update(html, callback)
+function hide_modal()
 {
-	var ref = $("#d_modal_update")
-	ref.find(".modal-body").html(html)
-	ref.modal()
-	loading(0)
-
-	ref.on('click', '#bt_modal_save', function()
-	{
-		loading(1)
-		callback()
-		loading(0)
-	});
+	return $("#d_modal").modal('hide')
 }
 
 function get(list)
@@ -122,7 +116,6 @@ function get_userdata()
 	var yang_userpass_hash = $.jStorage.get("yanger_pass_hash")
 
 	console.debug("user:"+ yang_username)
-	console.debug("pass:"+ yang_userpass_hash)
 
 	if (!yang_username || !yang_userpass_hash)
 		return 0
@@ -144,7 +137,7 @@ function get_userdata()
 	$.fn.csInfo = function(arg1,arg2)
 	{
 		++csInfoID;
-		var bkgclass="cs-gradient-blue";
+		var bkgclass="alert alert-info"
 		var duration=2500;
 
 		if(arg1&&arg2) (bkgclass=arg1) && (duration=arg2);

@@ -241,6 +241,7 @@ var yang = new function()
 
 		"revision-date":
 		{
+			default: '2014-12-12',
 			desc: "specify the exact version of the module to import",
 			ref: "http://tools.ietf.org/html/rfc6020#page-41",
 			uniq:1
@@ -248,7 +249,6 @@ var yang = new function()
 
 		"include":
 		{
-
 			desc: "make content from a submodule available to that submodule's parent module, or to another submodule of that parent module",
 			ref: "http://tools.ietf.org/html/rfc6020#page-42",
 			uniq:0,
@@ -260,7 +260,6 @@ var yang = new function()
 
 		"organization":
 		{
-
 			desc: "defines the party responsible for this module",
 			ref: "http://tools.ietf.org/html/rfc6020#page-42",
 			uniq:1
@@ -268,7 +267,6 @@ var yang = new function()
 
 		"contact":
 		{
-
 			desc: "provides contact information for this module",
 			ref: "http://tools.ietf.org/html/rfc6020#page-42",
 			uniq:1
@@ -276,7 +274,6 @@ var yang = new function()
 
 		"revision":
 		{
-
 			desc: "specifies the editorial revision history of the module, including the initial revision",
 			ref: "http://tools.ietf.org/html/rfc6020#page-43",
 			uniq:1,
@@ -289,7 +286,6 @@ var yang = new function()
 
 		"submodule":
 		{
-
 			desc: "split modules in submodules",
 			ref: "http://tools.ietf.org/html/rfc6020#page-45",
 			uniq:0,
@@ -325,7 +321,6 @@ var yang = new function()
 
 		"belongs-to":
 		{
-
 			desc: "specifies the module to which the submodule belongs",
 			ref: "http://tools.ietf.org/html/rfc6020#page-47",
 			uniq:1,
@@ -337,7 +332,6 @@ var yang = new function()
 
 		"typedef":
 		{
-
 			desc: "defines a new type that may be used locally in the module, in modules or submodules which include it, and by other modules that import from it",
 			ref: "http://tools.ietf.org/html/rfc6020#page-48",
 			uniq:1,
@@ -361,7 +355,6 @@ var yang = new function()
 
 		"container":
 		{
-
 			desc: "defines an interior data node in the schema tree",
 			ref: "http://tools.ietf.org/html/rfc6020#page-50",
 			uniq:0,
@@ -389,7 +382,6 @@ var yang = new function()
 
 		"must":
 		{
-
 			desc:"declare a constraint on valid data",
 			ref: "http://tools.ietf.org/html/rfc6020#page-53",
 			uniq:1,

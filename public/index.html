@@ -27,45 +27,27 @@
 
 				<div id="d_welcome" class="navbar-form navbar-right">
 					Welcome <strong id="s_msg"></strong>
-					<a href='#' id="a_logout" data-toogle="tooltip" title="Logout" data-placement="bottom"><span class="glyphicon glyphicon-off" aria-hidden="true"></span></a>
+					<button id="a_logout" data-toogle="tooltip" title="Logout" data-placement="bottom"><span class="glyphicon glyphicon-off" aria-hidden="true"></span></button>
 				</div>
 
 			</div>
 		</nav>
 
-		<div id="d_modal_info" class="modal fade">
-			<div class="modal-dialog">
+		<div id="d_modal" class="modal fade show-modal" tabindex="-1" role="dialog" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
 				<div class="modal-content">
-					<div class="modal-header cs-gradient-red">
+					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal">
-						<span aria-hidden="true">&times;</span>
-						<span class="sr-only">Close</span></button>
-						<h4 class="modal-title"></h4>
+							<span aria-hidden="true">&times;</span>
+							<span class="sr-only">Close</span>
+						</button>
+						<h4 class="modal-title">Modal title</h4>
 					</div>
-					<div class="modal-body"></div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					</div>
-				</div><!-- /.modal-content -->
-			</div><!-- /.modal-dialog -->
-		</div><!-- /.modal -->
-		<div id="d_modal_update" class="modal fade">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header cs-gradient-blue">
-						<button type="button" class="close" data-dismiss="modal">
-						<span aria-hidden="true">&times;</span>
-						<span class="sr-only">Close</span></button>
-						<h4 class="modal-title">Update</h4>
-					</div>
-					<div class="modal-body"></div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-						<button id="bt_modal_save" type="button" class="btn btn-primary">Save changes</button>
-					</div>
-				</div><!-- /.modal-content -->
-			</div><!-- /.modal-dialog -->
-		</div><!-- /.modal -->
+					<div class="modal-body" id="modal-body"></div>
+					<div class="modal-footer"></div>
+				</div>
+			</div>
+		</div>
 
 	</header>
 
@@ -73,52 +55,51 @@
 
 		<div id="d_options">
 
-			<a href='#' id="a_files" class="btn btn-default btn-xs" data-toggle="tooltip" title="Manage your yang files">
-				<span class="glyphicon glyphicon-th-list"></span>
-				Files
-			</a>
-
-			<div class="modal fade files-modal" tabindex="-1" role="dialog" aria-hidden="true">
-				<div class="modal-dialog modal-lg">
-					<div class="modal-content"></div>
-				</div>
+			<div class="btn-group" data-toggle="tooltip" title="Manage your yang files">
+				<button id="a_files" class="btn btn-default btn-xs">
+					<span class="glyphicon glyphicon-th-list"></span>
+					Files
+				</button>
 			</div>
 
-			<span class="dropdown">
-
-				<a href='#' class="btn btn-primary btn-xs dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+			<div class="btn-group new-module" data-toggle="tooltip" title="Create new yang module">
+				<button class="btn btn-primary btn-xs dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true" >
 					<span class="glyphicon glyphicon-file" aria-hidden="true"></span>
 					New
 					<span class="caret"></span>
-				</a>
+				</button>
 				<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-					<li role="presentation"><a id="new_module" role="menuitem" tabindex="-1" href="#">Module</a></li>
-					<li role="presentation"><a id="new_submodule" role="menuitem" tabindex="-1" href="#">Submodule</a></li>
+					<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Module</a></li>
+					<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Submodule</a></li>
 				</ul>
-			</span>
+			</div>
 
-			<a href='#' id="a_validate" class="btn btn-primary btn-xs">
-				<span class="glyphicon glyphicon-export"></span>
-				Validate
-			</a>
+			<div class="btn-group" data-toggle="tooltip" title="Validate your yang file using pyang">
+				<button id="a_validate" class="btn btn-primary btn-xs">
+					<span class="glyphicon glyphicon-export"></span>
+					Validate
+				</button>
+			</div>
 
-			<span class="dropdown">
-				<a href='#' class="btn btn-primary btn-xs dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-expanded="true">
+			<div class="btn-group" data-toggle="tooltip" title="Get yang file">
+				<button class="btn btn-primary btn-xs dropdown-toggle" id="dropdownMenu2" data-toggle="dropdown" aria-expanded="true">
 					<span class="glyphicon glyphicon-export" aria-hidden="true"></span>
 					Export
 					<span class="caret"></span>
-				</a>
+				</button>
 				<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
-					<li role="presentation"><a id="a_export_to_clipboard" role="menuitem" tabindex="-1" href="#">To clipboard</a></li>
+					<li role="presentation"><a id="a_export_to_window" role="menuitem" tabindex="-1" href="#">To new window</a></li>
 				</ul>
-			</span>
+			</div>
 
-			<a href='#' id="a_save" class="btn btn-primary btn-xs" data-toggle="tooltip" title="Save changes">
-				<span class="glyphicon glyphicon-save"></span>
-				Save
-			</a>
+			<div class="btn-group" data-toggle="tooltip" title="Save changes">
+				<button id="a_save" class="btn btn-primary btn-xs">
+					<span class="glyphicon glyphicon-save"></span>
+					Save
+				</button>
+			</div>
 
-			<img id="i_spinner" src="img/spinner.gif" />
+			<img id="i_spinner" src="img/spinner.gif" alt="loading" />
 
 		</div>
 
@@ -128,16 +109,18 @@
 		</div>
 
 		<div id="d_output">
-			<div>
 			<h4>Validation</h4>
 			<hr/>
-			</div>
+			<div>Module not validated yet.</div>
 		</div>
 
 	</div>
 
 	<footer>
-	</footer>
+		<a href="http://validator.w3.org/check?uri=referer">
+			<img src="http://www.w3.org/html/logo/badge/html5-badge-h-connectivity-css3-performance-semantics-storage.png" width="131" height="32" alt="HTML5 Powered with Connectivity / Realtime, CSS3 / Styling, Performance &amp; Integration, Semantics, and Offline &amp; Storage" title="HTML5 Powered with Connectivity / Realtime, CSS3 / Styling, Performance &amp; Integration, Semantics, and Offline &amp; Storage">
+		</a>
+			</footer>
 
 	<script src="js/jquery.js"></script>
 	<script src="js/sha256.js"></script>

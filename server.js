@@ -251,47 +251,80 @@ app.post("/yang_validate/:output?", function(req, res)
 	dir_name = yang_modules_dir + dir_name
 	dir_name += "/"
 
-	/* try to create directory for user
- 	 * because of the nodejs asnyc nature it's recommended to create and check
- 	 * errors instead of using 'fs.exists'
- 	 * we can change this when user validation is added
- 	 */
+	var file_name = yang_module_name + '.yang'
+
+	write_file(dir_name, file_name, yang_module_content, function(error)
+	{
+		if (error)
+			return response(res, error)
+
+		exec('pyang', ['-f', 'yang', file_name], { cwd : dir_name }, function(error, stdout, stderr)
+		{
+			var data = {"error" : stderr}
+			output && (data.yang = stdout)
+
+			response(res,(error && error.killed) ? error : '', data)
+		})
+	})
+})
+
+/* download existing yang file from server
+ */
+
+app.get("/file/:username/:userpass_hash/:yang_module_name?", function(req, res)
+{
+	var username = req.param('username')
+	var userpass_hash = req.param('userpass_hash')
+	var yang_module_name = req.param('yang_module_name')
+
+	if (!user_is_valid(username, userpass_hash))
+		return response(res,"invalid username or password")
+
+	if (!identifier_valid(yang_module_name))
+		return response(res,"invalid yang module name")
+})
+
+/* create file with content, creates directory if doesn't exist
+ * because of the nodejs asnyc nature it's recommended to create and check
+ * errors instead of using 'fs.exists'
+ * we can change this when user validation is added
+ */
+
+function write_file(dir_name, file_name, file_content, callback)
+{
 	fs.mkdir(dir_name, function(error)
 	{
 		/* check if already exists or some other kind of error */
 
 		if (error && error.code != 'EEXIST')
 		{
-			return response(res,"unable to create directory:" + error.message)
+			callback && callback(error)
+			return
 		}
 
-		var file_name = yang_module_name + '.yang'
 		var file_path = dir_name + file_name
 
 		console.log("dir_name:" + dir_name)
 		console.log("file_name:" + file_name)
 		console.log("file_path:" + file_path)
 
-
 		/* save yang file and validate it using pyang
  		 * we set 'cwd' so that pyang can find multiple yang files easily
  		 */
-		fs.writeFile(file_path, yang_module_content, function (error)
+
+		fs.writeFile(file_path, file_content, function (error)
 		{
 			if (error)
-				return response(res,error)
-
-			exec('/usr/bin/pyang', ['-f', 'yang', file_name], { cwd : dir_name }, function(error, stdout, stderr)
 			{
-				/* stderr contains pyang information */
-				var data = {"error" : stderr}
-				output && (data.yang = stdout)
+				callback && callback(error)
+				return
+			}
 
-				response(res,(error && error.killed) ? error : '', data)
-			})
+			callback && callback()
+
 		})
 	})
-})
+}
 
 app.listen(port)
 console.log('Listening on port: ' + port);

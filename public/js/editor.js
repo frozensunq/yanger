@@ -1,7 +1,7 @@
 /*
  * Yang Creator UI
  *
- * DOM elements are created from structure which correspond to yang elements
+ * DOM elements are created from structure which corresponds to yang elements
  * structure.
  *
  * For best performance elements are only added/removed/drawn when needed (no
@@ -11,6 +11,7 @@
  * http://tools.ietf.org/html/rfc6020#page-143
  */
 
+/* main yang statement root */
 var yang_root = create_statement("module")
 
 $(function()
@@ -26,12 +27,34 @@ $("#d_options").on("click", ".new-module a", function(e)
 {
 	e.preventDefault()
 
-	var target = $(this).text().toLowerCase()
+	var target = $(this).text().trim().toLowerCase()
 	if (!confirm("Creating new " + target + ". Current changes will be lost if not saved. Continue?"))
 		return
 
 	yang_root = create_statement(target)
 	$("#d_editor").html(create_dom_statement(yang_root))
+})
+
+/*
+ * show user yang files saved on server
+ */
+
+$("#d_options").on("click", "#a_files", function()
+{
+	var user_data = get_userdata()
+	if (!user_data)
+		return show_alert("Please login to be able to use advanced features")
+
+	loading(1)
+
+	get_yang_list(function(html)
+	{
+		loading(0)
+
+		show_modal("Yang modules", html)
+	})
+
+	return false
 })
 
 /*
@@ -43,7 +66,7 @@ $("#d_editor").on("click", ".completion li", function()
 	var self = $(this).find('a span._name')
 
 	// elem name we want to create i.e "import"
-	var yang_statement_name = self.text()
+	var yang_statement_name = self.text().trim()
 	var yang_statement_id = get_id_from_dom(self)
 
 	if (yang_statement_name in yang.statements)
@@ -67,6 +90,135 @@ $("#d_editor").on("click", ".completion li", function()
 })
 
 /*
+ * validate current yang file
+ */
+
+$("#d_options").on("click", "#a_validate", function()
+{
+	var user_data = get_userdata()
+
+	var $d_validation = $("#d_validation")
+
+	$d_validation.html(spinner)
+	generate_yang(user_data, function(response)
+	{
+
+		$d_validation.html(response.error ? response.error : "Yang module is valid.")
+	})
+
+	return false
+})
+
+/*
+ * epxport yang content to new window
+ */
+
+$("#d_options").on('click', '#a_export', function(e)
+{
+	e.preventDefault()
+
+	var user_data = get_userdata()
+
+	loading(1)
+	generate_yang(user_data, function(response)
+	{
+		loading(0)
+
+		if (!response || !response.yang)
+			return show_alert('yang generation failed')
+
+		var cp_button = $('<button id="a_copy_to_clipboard" type="button" class="btn btn-primary btn-xs" data-clipboard-target="modal-body" title="requires flash plugin">'+
+							'<span class="glyphicon glyphicon-transfer"></span> '+
+							'Copy to clipboard'+
+						'</button>')
+
+		var clipboard = new ZeroClipboard(cp_button)
+
+		show_modal(get_full_yang_name(), unix_to_html(response.yang, true), cp_button)
+
+		clipboard.on('ready', function()
+		{
+			clipboard.on('aftercopy', function(event)
+			{
+				show_alert('copied to clipboard')
+
+				ZeroClipboard.destroy()
+			})
+		})
+
+		clipboard.on('error', function(event)
+		{
+			console.error( 'ZeroClipboard error of type "' + event.name + '": ' + event.message )
+			ZeroClipboard.destroy()
+		})
+
+	}, true)
+
+})
+
+/*
+ * save yang file to server
+ */
+
+$("#d_options").on("click", "#a_save", function()
+{
+	var user_data = get_userdata()
+	if (!user_data)
+		return show_alert("Please login to be able to use advanced features")
+
+	var yang_module_name = get_full_yang_name()
+	if (!yang_module_name)
+		return show_alert("No existing module")
+
+	console.log(yang_root)
+
+	var yang_module_content = get_yang_from_dom($("#d_editor"))
+	if (!yang_module_content)
+		return console.error("no module content")
+
+	loading(1)
+	$.ajax
+	({
+		type: 'PUT',
+		url: '/yang/' + user_data.user + "/" + user_data.pass + "/" + yang_module_name,
+		data: {"yang_module_content" : yang_module_content},
+		success: function(response)
+		{
+			loading(0)
+
+			if (response.error)
+				return show_alert(response.error)
+
+			show_success('copied')
+		},
+		error: function(error)
+		{
+			loading(0)
+
+			if (response.error)
+				return show_alert(error)
+		}
+	})
+
+	return false
+})
+
+$("#d_options").on("click", "#a_download", function(e)
+{
+	e.preventDefault()
+
+	var user_data = get_userdata()
+	if (!user_data)
+		return show_alert("Please login to be able to use advanced features")
+
+	var yang_module_name = get_full_yang_name()
+	if (!yang_module_name)
+		return show_alert("No existing module")
+
+	location.href = '/yang/' + user_data.user + "/" + user_data.pass + "/" + yang_module_name
+})
+
+/*
  * show completion window
  */
 
@@ -78,9 +230,9 @@ $("#d_editor").on("click", "a.add", function()
 	var yang_statement_id = get_id_from_dom(self)
 	var yang_statement = yang_root.find(yang_statement_id)
 
-	var w = self.width();
-	var h = self.height();
-	var pos = self.offset();
+	var w = self.width()
+	var h = self.height()
+	var pos = self.offset()
 
 	var html = create_completion_window(yang_statement)
 	if (!html)
@@ -89,7 +241,7 @@ $("#d_editor").on("click", "a.add", function()
 	html.css({"position" : "absolute", left: pos.left - html.width(), top:(pos.top), padding: "1em"})
 
 	// completion filter field
-	var completion_field = self.append(html).find("#icompletion");
+	var completion_field = self.append(html).find("#icompletion")
 	completion_field.focus()
 
 	completion_field.on('keyup', function()
@@ -112,7 +264,7 @@ $("#d_editor").on("click", "a.add", function()
 		})
 	})
 
-	return false;
+	return false
 })
 
 /*
@@ -147,7 +299,7 @@ $("#d_editor").on("click", "a.delete", function()
 	var self_root = yang_root.find(id)
 	yang_root.remove(id)
 
-	return false;
+	return false
 })
 
 /*
@@ -246,139 +398,24 @@ $("#d_editor").on("drop", "div.yang", function(e)
 })
 
 /*
- * show user yang files saved on server
+ * firefox bug workaround
+ * disable draggable when editing content to allow 'select all text'
  */
 
-$("#d_options").on("click", "#a_files", function()
+$("#d_editor").on("focus", "[contenteditable]", function()
 {
-	var user_data = get_userdata()
-	if (!user_data)
-		return $("<span> Please login to be able to use advanced features </span>").csInfo('alert alert-danger')
-
-	loading(1)
-
-	get_yang_list(function(html)
+	$("[draggable]").each(function()
 	{
-		loading(0)
-
-		show_modal("Yang modules", html)
+		$(this).attr('draggable', false)
 	})
-
-	return false
 })
 
-/*
- * validate current yang file
- */
-
-$("#d_options").on("click", "#a_validate", function()
+$("#d_editor").on("blur", "[contenteditable]", function()
 {
-	var user_data = get_userdata()
-
-	loading(1)
-	generate_yang(user_data, function(response)
+	$("[draggable]").each(function()
 	{
-		loading(0)
-
-		$("#d_output").find("div").html(response.error ? response.error : "Yang module is valid.")
+		$(this).attr('draggable', true)
 	})
-
-	return false
-})
-
-/*
- * save yang file to server
- */
-
-$("#d_options").on("click", "#a_save", function()
-{
-	var user_data = get_userdata()
-	if (!user_data)
-		return $("<span> Please login to be able to use advanced features </span>").csInfo('alert alert-danger')
-
-	var yang_module_name = get_full_yang_name()
-
-	if (!yang_module_name)
-		return $("<span> No existing module </span>").csInfo('alert alert-danger')
-
-	console.log(yang_root)
-
-	var yang_module_content = get_yang_from_dom($("#d_editor"))
-	if (!yang_module_content)
-		return console.error("no module content")
-
-	loading(1)
-	$.ajax
-	({
-		type: 'PUT',
-		url: '/yang/' + user_data.user + "/" + user_data.pass + "/" + yang_module_name,
-		data: {"yang_module_content" : yang_module_content},
-		success: function(response)
-		{
-			loading(0)
-
-			if (response.error)
-				return $("<span>" + response.error +"</span>").csInfo('alert alert-danger')
-
-			$("<span> saved </span>").csInfo()
-		},
-		error: function(error)
-		{
-			loading(0)
-
-			if (response.error)
-				return $("<span>" + error +"</span>").csInfo('alert alert-danger')
-		}
-	})
-
-	return false
-})
-
-/*
- * epxport yang content to new window
- */
-
-$("#d_options").on('click', '#a_export_to_window', function(e)
-{
-	e.preventDefault()
-
-	var user_data = get_userdata()
-
-	loading(1)
-	generate_yang(user_data, function(response)
-	{
-		loading(0)
-
-		if (!response || !response.yang)
-			return $('<span>yang generation failed</span>').csInfo('alert alert-danger')
-
-		var cp_button = $('<button id="a_copy_to_clipboard" type="button" class="btn btn-primary btn-xs" data-clipboard-target="modal-body" title="requires flash plugin">'+
-							'<span class="glyphicon glyphicon-transfer"></span> '+
-							'Copy to clipboard'+
-						'</button>')
-
-		var clipboard = new ZeroClipboard(cp_button)
-
-		show_modal(get_full_yang_name(), unix_to_html(response.yang, true), cp_button)
-
-		clipboard.on('ready', function()
-		{
-			clipboard.on('aftercopy', function(event)
-			{
-				$('<span>copied to clipboard</span>').csInfo()
-
-				ZeroClipboard.destroy()
-			})
-		})
-
-		clipboard.on('error', function(event)
-		{
-			console.error( 'ZeroClipboard error of type "' + event.name + '": ' + event.message )
-			ZeroClipboard.destroy()
-		})
-
-	}, true)
-
 })
 
 /*
@@ -398,7 +435,7 @@ function generate_yang(user_data, callback, output)
 		return console.error("generate yang: no callback")
 
 	if (!user_data)
-		return $("<span> Please login to be able to use advanced features </span>").csInfo('alert alert-danger')
+		return show_alert("Please login to be able to use advanced features")
 
 	var yang_module_name = yang_root.nameval
 	if (!yang_module_name)
@@ -415,7 +452,7 @@ function generate_yang(user_data, callback, output)
 		success: function(response)
 		{
 			if (response.error)
-				return $("<span> " + response.error + " </span>").csInfo('alert alert-danger')
+				return show_alert(response.error)
 
 			if (response.data.error)
 			{
@@ -425,7 +462,7 @@ function generate_yang(user_data, callback, output)
 		},
 		error: function(error)
 		{
-			return $("<span> " + error + " </span>").csInfo('alert alert-danger')
+			return show_alert(error)
 		}
 	})
 }
@@ -638,13 +675,13 @@ function get_yang_list(callback)
 			var self = $(this)
 
 			var user_data = get_userdata()
-			var yang_module_name = self.closest('tr').find('[data-module-name]').text()
+			var yang_module_name = self.closest('tr').find('[data-module-name]').text().trim()
 
 			$.getJSON('/yang/' + user_data.user + "/" + user_data.pass + "/" + yang_module_name,
 			function(response)
 			{
 				if (!response || response.error || !response.data)
-					return $("<span> unable to fetch server data </span>").csInfo('alert alert-danger')
+					return show_alert("unable to fetch server data")
 
 				console.log(response.data)
 
@@ -656,7 +693,7 @@ function get_yang_list(callback)
 				}
 				catch(e)
 				{
-					return $("<span>" + e + "</span>").csInfo('alert alert-danger')
+					return show_alert(e)
 				}
 			})
 
@@ -670,7 +707,7 @@ function get_yang_list(callback)
 				return
 
 			var user_data = get_userdata()
-			var yang_module_name = self.closest('tr').find('[data-module-name]').text()
+			var yang_module_name = self.closest('tr').find('[data-module-name]').text().trim()
 
 			$.ajax
 			({
@@ -698,7 +735,7 @@ function get_yang_list(callback)
 				{
 					console.error(error)
 				}
-			});
+			})
 
 			return false
 		})
@@ -751,9 +788,17 @@ function create_statement(statement)
 {
 	statement = statement || "module"
 
-	var yang_root = new yang.statement(statement, "example")
-	yang_root.add("namespace", "urn:ietf:params:xml:ns:yang:example")
-	yang_root.add("prefix", "ie")
+	var yang_root = new yang.statement(statement, "example-" + statement)
+	if (statement == "module")
+	{
+		yang_root.add("namespace", "urn:ietf:params:xml:ns:yang:example")
+		yang_root.add("prefix", "ie")
+	}
+	else if (statement == "submodule")
+	{
+		var e = yang_root.add("belongs-to", "example-module")
+		e.add("prefix", "ie")
+	}
 
 	yang_root.add("description", "example yang module")
 	yang_root.add("contact", "petar.koretic@sartura.hr")

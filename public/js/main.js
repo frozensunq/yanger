@@ -1,29 +1,24 @@
-var spinner = "<div style='text-align:center'><div class='spinner_img'></div></div>";
-var spinner_left = "<div class='spinner_img'></div>";
-
-var validIP = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+var spinner = "<img src='img/spinner.gif' alt='loading' />"
 
 function loading(show)
 {
-	$("#i_spinner").css('visibility', (show == 1) ? 'visible' : 'hidden' );
+	$("#i_spinner").css('visibility', (show == 1) ? 'visible' : 'hidden' )
 }
 
 $(function()
 {
-	$("[data-toogle='tooltip']").tooltip()
-
 	// open last opened link or open channels if nothing requested
 	if(location.hash)
-		process_action(location.hash);
+		process_action(location.hash)
 	else
-		location.hash="#editor";
+		location.hash="#editor"
 
 	// open when hash changes - click mostly
 	$(window).on("hashchange",function()
 	{
-		var action = location.hash;
-		process_action(action);
-	});
+		var action = location.hash
+		process_action(action)
+	})
 
 	function set_login_welcome()
 	{
@@ -69,14 +64,21 @@ $(function()
 
 function process_action(action)
 {
-	if(!action) return;
+	if(!action)
+		return
 
-	action = $.trim(action.replace('#',''));
+	action = $.trim(action.replace('#',''))
 }
 
 function show_success(msg)
 {
-	$("<span>" + msg +"<hr style='margin:8px'/></span>").csInfo()
+	$("<span>" + msg +" </span>").csInfo()
+	loading(0)
+}
+
+function show_alert(msg)
+{
+	$("<span>" + msg +" </span>").csInfo('alert alert-danger')
 	loading(0)
 }
 
@@ -99,15 +101,6 @@ function show_modal(title, html, footer)
 function hide_modal()
 {
 	return $("#d_modal").modal('hide')
-}
-
-function get(list)
-{
-	var promises = []
-	for (var i in list)
-		promises.push($.getJSON(list[i]))
-
-	return Promise.all(promises)
 }
 
 function get_userdata()
@@ -133,24 +126,24 @@ function get_userdata()
 	}
 
 	/* csDefault */
-	var csInfoID=0;
+	var csInfoID=0
 	$.fn.csInfo = function(arg1,arg2)
 	{
-		++csInfoID;
+		++csInfoID
 		var bkgclass="alert alert-info"
-		var duration=2500;
+		var duration=2500
 
-		if(arg1&&arg2) (bkgclass=arg1) && (duration=arg2);
-		else arg1 && (isNaN(arg1) && (bkgclass=arg1) || (duration=arg1));
+		if(arg1&&arg2) (bkgclass=arg1) && (duration=arg2)
+		else arg1 && (isNaN(arg1) && (bkgclass=arg1) || (duration=arg1))
 
-		var msg = $(this).outerHTML();
+		var msg = $(this).outerHTML()
 
-		var html = $('<div id="csInfoDiv'+csInfoID+'"><div id="csInfoInner" class="'+bkgclass+' small">'+msg+'</div></div>');
+		var html = $('<div id="csInfoDiv'+csInfoID+'"><div id="csInfoInner" class="'+bkgclass+' small">'+msg+'</div></div>')
 
-		$div=$("body").append(html).find('div[id^="csInfoDiv"]');
-		$div.addClass("csInfoDiv");
-		$div.slideDown("fast").delay(duration).slideUp("fast",function(){$(this).remove()});
-		$div.hover(function() { $(this).css("opacity","0.5");}, function() { $(this).css("opacity","1"); });
+		$div=$("body").append(html).find('div[id^="csInfoDiv"]')
+		$div.addClass("csInfoDiv")
+		$div.slideDown("fast").delay(duration).slideUp("fast",function(){$(this).remove()})
+		$div.hover(function() { $(this).css("opacity","0.5")}, function() { $(this).css("opacity","1") })
 	}
-})(jQuery);
+})(jQuery)
 

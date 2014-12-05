@@ -76,20 +76,16 @@
 
 			<div class="btn-group" data-toggle="tooltip" title="Validate your yang file using pyang">
 				<button id="a_validate" class="btn btn-primary btn-xs">
-					<span class="glyphicon glyphicon-export"></span>
+					<span class="glyphicon glyphicon-check"></span>
 					Validate
 				</button>
 			</div>
 
 			<div class="btn-group" data-toggle="tooltip" title="Get yang file">
-				<button class="btn btn-primary btn-xs dropdown-toggle" id="dropdownMenu2" data-toggle="dropdown" aria-expanded="true">
+				<button id="a_export" class="btn btn-primary btn-xs">
 					<span class="glyphicon glyphicon-export" aria-hidden="true"></span>
 					Export
-					<span class="caret"></span>
 				</button>
-				<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
-					<li role="presentation"><a id="a_export_to_window" role="menuitem" tabindex="-1" href="#">To new window</a></li>
-				</ul>
 			</div>
 
 			<div class="btn-group" data-toggle="tooltip" title="Save changes">
@@ -111,7 +107,7 @@
 		<div id="d_output">
 			<h4>Validation</h4>
 			<hr/>
-			<div>Module not validated yet.</div>
+			<div id="d_validation">Module not validated yet.</div>
 		</div>
 
 	</div>

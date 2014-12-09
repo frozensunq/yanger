@@ -50,6 +50,7 @@ $(function()
 
 		set_login_welcome()
 
+		return false
 	})
 
 	$("#d_welcome").on("click", "#a_logout", function()
@@ -100,7 +101,7 @@ function show_modal(title, html, footer)
 
 function hide_modal()
 {
-	return $("#d_modal").modal('hide')
+	$("#d_modal").modal('hide')
 }
 
 function get_userdata()

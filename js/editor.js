@@ -61,9 +61,9 @@ $("#d_options").on("click", "#a_files", function()
  * add new element
  */
 
-$("#d_editor").on("click", ".completion li", function()
+$("#d_editor").on("click", ".completion a._elem", function()
 {
-	var self = $(this).find('a span._name')
+	var self = $(this).find('span._name')
 
 	// elem name we want to create i.e "import"
 	var yang_statement_name = self.text().trim()
@@ -127,14 +127,19 @@ $("#d_options").on('click', '#a_export', function(e)
 		if (!response || !response.yang)
 			return show_alert('yang generation failed')
 
-		var cp_button = $('<button id="a_copy_to_clipboard" type="button" class="btn btn-primary btn-xs" data-clipboard-target="modal-body" title="requires flash plugin">'+
+		var yang_module_name = get_full_yang_name(yang_root)
+
+		var file_url = '/file/' + user_data.user + "/" + user_data.pass + "/" + yang_module_name
+
+		var h = $('<a href="' + file_url + '" class="btn btn-primary btn-xs">Download</a>' +
+					'<button id="bt_copy_to_clipboard" class="btn btn-primary btn-xs" data-clipboard-target="modal-body" title="requires flash plugin">'+
 							'<span class="glyphicon glyphicon-transfer"></span> '+
 							'Copy to clipboard'+
 						'</button>')
 
-		var clipboard = new ZeroClipboard(cp_button)
+		show_modal(yang_module_name, unix_to_html(response.yang, true), h)
 
-		show_modal(get_full_yang_name(), unix_to_html(response.yang, true), cp_button)
+		var clipboard = new ZeroClipboard($("#bt_copy_to_clipboard"))
 
 		clipboard.on('ready', function()
 		{
@@ -166,7 +171,7 @@ $("#d_options").on("click", "#a_save", function()
 	if (!user_data)
 		return show_alert("Please login to be able to use advanced features")
 
-	var yang_module_name = get_full_yang_name()
+	var yang_module_name = get_full_yang_name(yang_root)
 	if (!yang_module_name)
 		return show_alert("No existing module")
 
@@ -189,7 +194,7 @@ $("#d_options").on("click", "#a_save", function()
 			if (response.error)
 				return show_alert(response.error)
 
-			show_success('copied')
+			show_success('saved')
 		},
 		error: function(error)
 		{
@@ -211,11 +216,36 @@ $("#d_options").on("click", "#a_download", function(e)
 	if (!user_data)
 		return show_alert("Please login to be able to use advanced features")
 
-	var yang_module_name = get_full_yang_name()
+	var yang_module_name = get_full_yang_name(yang_root)
 	if (!yang_module_name)
 		return show_alert("No existing module")
 
 	location.href = '/yang/' + user_data.user + "/" + user_data.pass + "/" + yang_module_name
+})
+
+$("#d_options").on("click", "#bt_import", function()
+{
+	$('#f_import').ajaxForm(
+	{
+		beforeSend: function()
+		{
+			console.log("before send")
+		},
+		uploadProgress: function(event, position, total, percentComplete)
+		{
+			console.log("progress")
+		},
+		success: function()
+		{
+			console.log("success")
+		},
+		complete: function(response)
+		{
+			console.log(response)
+
+			show_success("imported")
+		}
+	})
 })
 
 /*
@@ -224,11 +254,20 @@ $("#d_options").on("click", "#a_download", function(e)
 
 $("#d_editor").on("click", "a.add", function()
 {
+	console.log("clicked")
+
 	remove_completion_window()
 
 	var self = $(this).closest('li')
 	var yang_statement_id = get_id_from_dom(self)
+
+	console.log(yang_statement_id)
+
+	console.log(yang_root)
+
 	var yang_statement = yang_root.find(yang_statement_id)
+
+	console.log(yang_statement)
 
 	var w = self.width()
 	var h = self.height()
@@ -271,7 +310,8 @@ $("#d_editor").on("click", "a.add", function()
  * remove completion window
  */
 
-$(document).on("keyup", function(e)
+/* 'Escape' key */
+$(document).keyup(function(e)
 {
 	if (e.keyCode == 27)
 		remove_completion_window()
@@ -279,12 +319,21 @@ $(document).on("keyup", function(e)
 	return false
 })
 
+/* outer click */
+$(document).mouseup(function(e)
+{
+	if ($(e.target).closest("div.completion").length === 0)
+		remove_completion_window()
+})
+
+/* close click */
 $("#d_editor").on("click", "div.completion a.close", function(e)
 {
 	remove_completion_window()
 
 	return false
 })
+
 
 /*
  * remove substatement
@@ -437,7 +486,7 @@ function generate_yang(user_data, callback, output)
 	if (!user_data)
 		return show_alert("Please login to be able to use advanced features")
 
-	var yang_module_name = yang_root.nameval
+	var yang_module_name = get_full_yang_name(yang_root)
 	if (!yang_module_name)
 		return console.error("no module")
 
@@ -526,10 +575,12 @@ function create_completion_window(statement)
 		completion_elements_count++
 
 		h += "<li>"
-		h += "<a href='#'><span class='small _name'>" + type_substatement_name + "</span></a>"
+		h += "<a href='#' class='_elem'><span class='small _name'>" + type_substatement_name + "</span></a>"
 		try
 		{
-			h += " : <span class='small property'>" + yang.statements[type_substatement_name].desc + "</span>"
+			var yang_statement_elem = yang.statements[type_substatement_name]
+			h += " : <span class='small property'>" + yang_statement_elem.desc + "</span>"
+			h += "<a href='" + yang_statement_elem.ref + "' target='_blank' class='small property'> (more)</a>"
 		}
 		catch(e)
 		{
@@ -661,8 +712,8 @@ function get_yang_list(callback)
 			h += "<tr>"
 			h += '<td data-module-name><span>' + yang_file + '</span></td>'
 			h += '<td>\
-			<a href="#" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-ok"></span> Use</a> \
-			<a href="#" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-remove"></span> Remove</a>'
+			<button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-ok"></span> Edit</button> \
+			<button class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-remove"></span> Remove</button>'
 			h += '<td>'
 			h += "</tr>"
 		}
@@ -683,21 +734,21 @@ function get_yang_list(callback)
 				if (!response || response.error || !response.data)
 					return show_alert("unable to fetch server data")
 
-				console.log(response.data)
-
 				try
 				{
-					yang_root = JSON.parse(response.data)
-					console.log(yang_root)
+					var yang_data = JSON.parse(response.data)
+
+					yang_root = new yang.statement(yang_data.kw, yang_data.arg)
+					convert_to_structure(yang_data, yang_root)
+
 					$("#d_editor").html(create_dom_statement(yang_root))
+					hide_modal()
 				}
 				catch(e)
 				{
 					return show_alert(e)
 				}
 			})
-
-			return false
 		})
 
 		$h.on('click', '.btn-danger', function()
@@ -762,7 +813,7 @@ function remove_server_path(str)
 	return str.replace(/\/[A-z0-9]+.\/[A-z0-9]+\//gi,'')
 }
 
-function get_full_yang_name()
+function get_full_yang_name(yang_root)
 {
 	var yang_module_name = yang_root.nameval
 
@@ -809,4 +860,22 @@ function create_statement(statement)
 	e.add("config", true)
 
 	return yang_root
+}
+
+/*
+ * convert parsed yang data to our structure
+ */
+function convert_to_structure(yang_data, yang_root)
+{
+	for (var i = 0, len = yang_data.substmts.length; i < len; i++)
+	{
+		var substatement = yang_data.substmts[i]
+		var e = yang_root.add(substatement.kw, substatement.arg)
+		convert_to_structure(substatement, e)
+	}
+}
+
+function import_yang(yang)
+{
+
 }

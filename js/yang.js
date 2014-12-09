@@ -151,24 +151,23 @@ var yang = new function()
 		"description":
 		{
 			desc: "description of this definition",
-			ref: "http://tools.ietf.org/html/rfc6020#page-105",
+			ref: "http://tools.ietf.org/html/rfc6020#page-106",
 			uniq:1
 		},
 
 		"reference":
 		{
 			desc: "reference to this definition",
-			ref: "http://tools.ietf.org/html/rfc6020#page-105",
+			ref: "http://tools.ietf.org/html/rfc6020#page-106",
 			uniq:1
 		},
 
 		"when":
 		{
 			desc: "make data definition conditional",
-			ref: "http://tools.ietf.org/html/rfc6020#page-106",
+			ref: "http://tools.ietf.org/html/rfc6020#page-107",
 			uniq:1
 		},
-
 
 		"module":
 		{
@@ -450,7 +449,7 @@ var yang = new function()
 			uniq:1
 		},
 
-		"leaf-lists":
+		"leaf-list":
 		{
 			desc: "define a simple scalar variable of a particular type",
 			ref: "http://tools.ietf.org/html/rfc6020#page-61",
@@ -643,11 +642,13 @@ var yang = new function()
 				"when"
 			]
 		},
+
 		"refine":
 		{
 			desc: "Some of the properties of each node in the grouping can be refined with the 'refine' statement. The argument is a string that identifies a node in the grouping.",
 			ref: "http://tools.ietf.org/html/rfc6020#page-84",
 		},
+
 		"rpc":
 		{
 			desc: "Define a NETCONF RPC operation.  It takes one argument, which is an identifier, followed by a block of substatements that holds detailed rpc information.",
@@ -665,10 +666,32 @@ var yang = new function()
 			]
 		},
 
+		"notification":
+		{
+			desc: "define a NETCONF notification.",
+			ref: "http://tools.ietf.org/html/rfc6020#page-91",
+			subs:
+			[
+				"anyxml",
+				"choice",
+				"container",
+				"description",
+				"grouping",
+				"if-feature",
+				"leaf",
+				"leaf-list",
+				"list",
+				"reference",
+				"status",
+				"typedef",
+				"uses"
+			]
+		},
+
 		"augment":
 		{
-			desc: "",
-			ref: "",
+			desc: "allows a module or submodule to add to the schema tree defined in an external module, or the current module and its submodules, and to add to the nodes from a grouping in a 'uses' statement.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-93",
 			subs:
 			[
 				"anyxml",
@@ -685,7 +708,105 @@ var yang = new function()
 				"uses",
 				"when",
 			]
-		}
+		},
+
+		"identity":
+		{
+			desc: "used to define a new globally unique, abstract, and untyped identity.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-97",
+			subs:
+			[
+				"base",
+				"description",
+				"reference",
+				"status"
+			]
+		},
+
+		"base":
+		{
+			desc: "takes as an argument a string that is the name of an existing identity, from which the new identity is derived.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-97"
+		},
+
+		"extension":
+		{
+			desc: "allows the definition of new statements within the YANG language.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-98",
+			subs:
+			[
+				"argument",
+				"description",
+				"reference",
+				"status"
+			]
+		},
+
+		"argument":
+		{
+			desc: "allows the definition of new statements within the YANG language.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-99",
+			subs:
+			[
+				"yin-element"
+			]
+		},
+
+		"yin-element":
+		{
+			default: "true",
+			desc: "allows the definition of new statements within the YANG language.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-99"
+		},
+
+		"feature":
+		{
+			desc: "define a mechanism by which portions of the schema are marked as conditional.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-100",
+			subs:
+			[
+				"description",
+				"if-feature",
+				"status",
+				"reference"
+			]
+		},
+
+		"if-feature":
+		{
+			desc: "makes its parent statement conditional. The argument is the name of a feature, as defined by a 'feature' statement.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-102"
+		},
+
+		"deviation":
+		{
+			desc: "defines a hierarchy of a module that the device does not implement faithfully.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-103",
+			subs:
+			[
+				"description",
+				"deviate",
+				"reference"
+			]
+		},
+
+		"deviate":
+		{
+			desc: "defines how the device's implementation of the target node deviates from its original definition.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-103",
+			subs:
+			[
+				"config",
+				"default",
+				"mandatory",
+				"max-elements",
+				"min-elements",
+				"must",
+				"type",
+				"unique",
+				"units"
+			]
+		},
 	}
 
 }

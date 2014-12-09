@@ -112,6 +112,11 @@ a.add {
 	visibility:hidden
 }
 
+.modal .modal-body {
+    max-height: 700px;
+    overflow-y: auto;
+}
+
 /* csDefault */
 /* Notification holder */
 .csInfoDiv {display:none;z-index:10000; position:fixed; top:0; width:100%; left:0; text-align:center;padding:0; margin:0}

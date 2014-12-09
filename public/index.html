@@ -4,9 +4,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Yang creator UI</title>
-	<link rel="stylesheet" href="css/bootstrap.css" />
-	<link rel="stylesheet" href="css/bootstrap-theme.css" />
-	<link rel="stylesheet" href="css/main.css" />
+	<link rel="stylesheet" href="main.css" />
 </head>
 <body>
 
@@ -55,47 +53,62 @@
 
 		<div id="d_options">
 
-			<div class="btn-group" data-toggle="tooltip" title="Manage your yang files">
-				<button id="a_files" class="btn btn-default btn-xs">
-					<span class="glyphicon glyphicon-th-list"></span>
-					Files
-				</button>
-			</div>
+			<div class='row'>
 
-			<div class="btn-group new-module" data-toggle="tooltip" title="Create new yang module">
-				<button class="btn btn-primary btn-xs dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true" >
-					<span class="glyphicon glyphicon-file" aria-hidden="true"></span>
-					New
-					<span class="caret"></span>
-				</button>
-				<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-					<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Module</a></li>
-					<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Submodule</a></li>
-				</ul>
-			</div>
+				<div class='col-md-8'>
 
-			<div class="btn-group" data-toggle="tooltip" title="Validate your yang file using pyang">
-				<button id="a_validate" class="btn btn-primary btn-xs">
-					<span class="glyphicon glyphicon-check"></span>
-					Validate
-				</button>
-			</div>
+					<div class="btn-group" data-toggle="tooltip" title="Manage your yang files">
+						<button id="a_files" class="btn btn-default btn-xs">
+							<span class="glyphicon glyphicon-th-list"></span>
+							Files
+						</button>
+					</div>
 
-			<div class="btn-group" data-toggle="tooltip" title="Get yang file">
-				<button id="a_export" class="btn btn-primary btn-xs">
-					<span class="glyphicon glyphicon-export" aria-hidden="true"></span>
-					Export
-				</button>
-			</div>
+					<div class="btn-group new-module" data-toggle="tooltip" title="Create new yang module">
+						<button class="btn btn-primary btn-xs dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true" >
+							<span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+							New
+							<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+							<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Module</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Submodule</a></li>
+						</ul>
+					</div>
 
-			<div class="btn-group" data-toggle="tooltip" title="Save changes">
-				<button id="a_save" class="btn btn-primary btn-xs">
-					<span class="glyphicon glyphicon-save"></span>
-					Save
-				</button>
-			</div>
+					<div class="btn-group" data-toggle="tooltip" title="Validate your yang file using pyang">
+						<button id="a_validate" class="btn btn-primary btn-xs">
+							<span class="glyphicon glyphicon-check"></span>
+							Validate
+						</button>
+					</div>
 
-			<img id="i_spinner" src="img/spinner.gif" alt="loading" />
+					<div class="btn-group" data-toggle="tooltip" title="Get yang file">
+						<button id="a_export" class="btn btn-primary btn-xs">
+							<span class="glyphicon glyphicon-export" aria-hidden="true"></span>
+							Export
+						</button>
+					</div>
+
+					<div class="btn-group" data-toggle="tooltip" title="Save changes">
+						<button id="a_save" class="btn btn-primary btn-xs">
+							<span class="glyphicon glyphicon-save"></span>
+							Save
+						</button>
+					</div>
+
+					<img id="i_spinner" src="img/spinner.gif" alt="loading" width="16" height="16" />
+				</div>
+
+				<div class='col-md-4'>
+
+						<form id="f_import" action="/file" method="post" enctype="multipart/form-data">
+    						<input type="file" id="import_file" name="import_file" />
+    						<input id="bt_import" type="submit" name="submit_button" value="import" />
+						</form>
+				</div>
+
+			</div>
 
 		</div>
 
@@ -114,19 +127,11 @@
 
 	<footer>
 		<a href="http://validator.w3.org/check?uri=referer">
-			<img src="http://www.w3.org/html/logo/badge/html5-badge-h-connectivity-css3-performance-semantics-storage.png" width="131" height="32" alt="HTML5 Powered with Connectivity / Realtime, CSS3 / Styling, Performance &amp; Integration, Semantics, and Offline &amp; Storage" title="HTML5 Powered with Connectivity / Realtime, CSS3 / Styling, Performance &amp; Integration, Semantics, and Offline &amp; Storage">
+			<img src="img/html5.png" width="131" height="32" alt="HTML5 Powered with Connectivity / Realtime, CSS3 / Styling, Performance &amp; Integration, Semantics, and Offline &amp; Storage" title="HTML5 Powered with Connectivity / Realtime, CSS3 / Styling, Performance &amp; Integration, Semantics, and Offline &amp; Storage">
 		</a>
 			</footer>
 
-	<script src="js/jquery.js"></script>
-	<script src="js/sha256.js"></script>
-	<script src="js/ZeroClipboard.min.js"></script>
-	<script src="js/bootstrap.js"></script>
-	<script src="js/json2.js"></script>
-	<script src="js/jstorage.js"></script>
-	<script src="js/main.js"></script>
-	<script src="js/yang.js"></script>
-	<script src="js/editor.js"></script>
+	<script src="main.js"></script>
 
 </body>
 </html>

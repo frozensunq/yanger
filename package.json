@@ -26,6 +26,9 @@
 	"dependencies": {
 		"express" : ">= 4.x",
 		"body-parser" : ">= 1.x",
-		"level" : ">= 0.18.x"
+		"level" : ">= 0.18.x",
+		"node-minify" : ">= 1.0.x",
+		"compression" : ">= 1.2.x",
+		"multer" : ">= 0.1.x"
 	}
 }

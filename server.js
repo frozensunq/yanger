@@ -18,7 +18,7 @@ var app = express()
 app.use(compress())
 app.use(multer({rename : function(filedname, filename) {return filename}}))
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(express.static(__dirname + '/public', { maxAge: 2592000 }))
+app.use(express.static(__dirname + '/public', { maxAge: 25920000000 }))
 
 console.log("minifying css/js files")
 
@@ -211,7 +211,14 @@ app.get("/yang/:username/:userpass_hash/:yang_module_name?", function(req, res)
 				if (error)
 					return response(res,error.toString())
 
-				response(res, null, JSON.stringify(yang_parser.parse(value)))
+				try
+				{
+					response(res, null, JSON.stringify(yang_parser.parse(value)))
+				}
+				catch(e)
+				{
+					return response(res, e)
+				}
 			})
 		}
 		else
@@ -321,12 +328,13 @@ app.post("/yang_validate/:output?", function(req, res)
 			response(res,(error && error.killed) ? error : '', data)
 
 			/* overwrite current yang file with validated */
-			write_file(dir_name, file_name, stdout)
+			write_file(dir_name, file_name, stdout.replace(/^\s*$/gm,''))
 		})
 	})
 })
 
-/* download existing yang file from server
+/*
+ * download existing yang file from server
  */
 
 app.get("/file/:username/:userpass_hash/:yang_module_name?", function(req, res)
@@ -361,13 +369,16 @@ app.get("/file/:username/:userpass_hash/:yang_module_name?", function(req, res)
 	})
 })
 
+/*
+ * upload yang file
+ */
+
 app.post("/file/", function(req, res)
 {
-	console.log("files:")
 	console.dir(req.files)
 
 	var file = req.files.import_file
-	if (file.extension !== 'yang' || file.mimetype !== 'application/yang')
+	if (file.extension !== 'yang')
 		return response(res, 'invalid file')
 
 	fs.readFile(file.path, { encoding : 'utf8' }, function (error, data)
@@ -375,11 +386,20 @@ app.post("/file/", function(req, res)
 		if (error)
 			return response(res, error)
 
-		response(res, null, JSON.stringify(yang_parser.parse(data)))
+		try
+		{
+			response(res, null, JSON.stringify(yang_parser.parse(data)))
+		}
+		catch(e)
+		{
+			return response(res, e)
+		}
+
 	})
 })
 
 /* create file with content, creates directory if doesn't exist
+ *
  * because of the nodejs asnyc nature it's recommended to create and check
  * errors instead of using 'fs.exists'
  * we can change this when user validation is added

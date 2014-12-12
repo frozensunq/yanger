@@ -113,8 +113,46 @@ a.add {
 }
 
 .modal .modal-body {
-    max-height: 700px;
-    overflow-y: auto;
+	max-height: 700px;
+	overflow-y: auto;
+}
+
+.btn-file {
+	position: relative;
+	overflow: hidden;
+}
+
+.btn-file input[type=file] {
+	position: absolute;
+	top: 0;
+	right: 0;
+	min-width: 100%;
+	min-height: 100%;
+	font-size: 100px;
+	text-align: right;
+	filter: alpha(opacity=0);
+	opacity: 0;
+	background: red;
+	cursor: inherit;
+	display: block;
+}
+
+input[readonly] {
+	cursor: text !important;
+}
+
+.input-xs {
+	height: 22px;
+	padding: 5px 5px;
+	font-size: 12px;
+	line-height: 1.5;
+	border-radius: 3px;
+}
+
+pre{
+	font-family: "Courier New", Courier, monospace, sans-serif;
+	background:#EFEFEF;
+	padding:15px
 }
 
 /* csDefault */

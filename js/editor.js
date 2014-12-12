@@ -47,14 +47,109 @@ $("#d_options").on("click", "#a_files", function()
 
 	loading(1)
 
-	get_yang_list(function(html)
+
+	$.getJSON('/yang/' + user_data.user + "/" + user_data.pass,
+	function(response)
 	{
 		loading(0)
 
-		show_modal("Yang modules", html)
+		if (!response || response.error || !response.data || !Array.isArray(response.data))
+			return console.error(response)
+
+		if (!response.data.length)
+		{
+			return show_modal("Yang modules", $("<span>No files saved yet</span>"))
+		}
+
+		var h = '<table class="files"><tr><th>Name</th><th>Actions</th></tr>'
+
+		for (var i = 0, len = response.data.length; i < len; i++)
+		{
+			var yang_file = response.data[i]
+			h += "<tr>"
+			h += '<td data-module-name><span>' + yang_file + '</span></td>'
+			h += '<td>\
+			<button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-ok"></span> Edit</button> \
+			<button class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-remove"></span> Remove</button>'
+			h += '<td>'
+			h += "</tr>"
+		}
+
+		h += "</table>"
+
+		$h = $(h)
+
+		show_modal("Yang modules", $h)
+
+		$h.on('click', '.btn-default', function(e)
+		{
+			var self = $(this)
+
+			var yang_module_name = self.closest('tr').find('[data-module-name]').text().trim()
+
+			$.getJSON('/yang/' + user_data.user + "/" + user_data.pass + "/" + yang_module_name,
+			function(response)
+			{
+				if (!response || response.error || !response.data)
+					return show_alert("unable to fetch server data")
+
+				try
+				{
+					var yang_data = JSON.parse(response.data)
+
+					yang_root = new yang.statement(yang_data.kw, yang_data.arg)
+					convert_to_structure(yang_data, yang_root)
+
+					$("#d_editor").html(create_dom_statement(yang_root))
+					hide_modal()
+				}
+				catch(e)
+				{
+					return show_alert(e)
+				}
+			})
+		})
+
+		$h.on('click', '.btn-danger', function()
+		{
+			var self = $(this)
+			if (!confirm("This can't be reverted. Are you sure?"))
+				return
+
+			var yang_module_name = self.closest('tr').find('[data-module-name]').text().trim()
+
+			$.ajax
+			({
+				type: 'DELETE',
+				url: '/yang/' + user_data.user + "/" + user_data.pass + "/" + yang_module_name,
+				dataType: 'json',
+				success: function(result)
+				{
+					if (!result.error)
+					{
+						var $tr = self.closest('tr')
+						var $table = $tr.closest('table')
+						if ($table.find('tr').length == 2)
+						{
+							$table.remove()
+							hide_modal()
+						}
+						else
+						{
+							$tr.remove()
+						}
+					}
+				},
+				error: function(error)
+				{
+					console.error(error)
+				}
+			})
+
+		})
+
 	})
 
-	return false
 })
 
 /*
@@ -96,13 +191,14 @@ $("#d_editor").on("click", ".completion a._elem", function()
 $("#d_options").on("click", "#a_validate", function()
 {
 	var user_data = get_userdata()
+	if (!user_data)
+		return show_alert("Please login to be able to use advanced features")
 
 	var $d_validation = $("#d_validation")
 
 	$d_validation.html(spinner)
 	generate_yang(user_data, function(response)
 	{
-
 		$d_validation.html(response.error ? response.error : "Yang module is valid.")
 	})
 
@@ -118,6 +214,8 @@ $("#d_options").on('click', '#a_export', function(e)
 	e.preventDefault()
 
 	var user_data = get_userdata()
+	if (!user_data)
+		return show_alert("Please login to be able to use advanced features")
 
 	loading(1)
 	generate_yang(user_data, function(response)
@@ -137,7 +235,7 @@ $("#d_options").on('click', '#a_export', function(e)
 							'Copy to clipboard'+
 						'</button>')
 
-		show_modal(yang_module_name, unix_to_html(response.yang, true), h)
+		show_modal(yang_module_name, '<pre>' + response.yang + '</pre>', h)
 
 		var clipboard = new ZeroClipboard($("#bt_copy_to_clipboard"))
 
@@ -175,9 +273,7 @@ $("#d_options").on("click", "#a_save", function()
 	if (!yang_module_name)
 		return show_alert("No existing module")
 
-	console.log(yang_root)
-
-	var yang_module_content = get_yang_from_dom($("#d_editor"))
+	var yang_module_content = html_entity_decode(get_yang_from_dom($("#d_editor"), true))
 	if (!yang_module_content)
 		return console.error("no module content")
 
@@ -223,27 +319,41 @@ $("#d_options").on("click", "#a_download", function(e)
 	location.href = '/yang/' + user_data.user + "/" + user_data.pass + "/" + yang_module_name
 })
 
+$("#d_options").on('change', "#import_file", function()
+{
+	var self = $(this)
+})
+
 $("#d_options").on("click", "#bt_import", function()
 {
+	var self = $("#import_file")
+
+	var ext = self.val().lastIndexOf('.yang')
+	if (ext === -1)
+	{
+		show_alert("Please select valid .yang file for import")
+		return false
+	}
+
 	$('#f_import').ajaxForm(
 	{
-		beforeSend: function()
-		{
-			console.log("before send")
-		},
-		uploadProgress: function(event, position, total, percentComplete)
-		{
-			console.log("progress")
-		},
-		success: function()
-		{
-			console.log("success")
-		},
 		complete: function(response)
 		{
-			console.log(response)
+			try
+			{
+				var yang_data = JSON.parse(response.responseJSON.data)
+				yang_root = new yang.statement(yang_data.kw, yang_data.arg)
+				convert_to_structure(yang_data, yang_root)
 
-			show_success("imported")
+				$("#d_editor").html(create_dom_statement(yang_root))
+
+				show_success("imported")
+			}
+			catch(e)
+			{
+				return show_alert(e)
+			}
+
 		}
 	})
 })
@@ -252,22 +362,16 @@ $("#d_options").on("click", "#bt_import", function()
  * show completion window
  */
 
-$("#d_editor").on("click", "a.add", function()
+$("#d_editor").on("click", "a.add", function(e)
 {
-	console.log("clicked")
+	e.preventDefault()
 
 	remove_completion_window()
 
 	var self = $(this).closest('li')
 	var yang_statement_id = get_id_from_dom(self)
 
-	console.log(yang_statement_id)
-
-	console.log(yang_root)
-
 	var yang_statement = yang_root.find(yang_statement_id)
-
-	console.log(yang_statement)
 
 	var w = self.width()
 	var h = self.height()
@@ -302,8 +406,6 @@ $("#d_editor").on("click", "a.add", function()
 			}
 		})
 	})
-
-	return false
 })
 
 /*
@@ -490,7 +592,7 @@ function generate_yang(user_data, callback, output)
 	if (!yang_module_name)
 		return console.error("no module")
 
-	var yang_module_content = get_yang_from_dom($("#d_editor"), true)
+	var yang_module_content = html_entity_decode(get_yang_from_dom($("#d_editor"), true))
 
 	$.ajax(
 	{
@@ -505,7 +607,7 @@ function generate_yang(user_data, callback, output)
 
 			if (response.data.error)
 			{
-				response.data.error = unix_to_html(remove_server_path(response.data.error))
+				response.data.error = remove_server_path(response.data.error)
 			}
 			callback(response.data)
 		},
@@ -623,7 +725,7 @@ function create_dom_statement(m)
 	var h = ""
 
 	// 'keyword' 'identifier'
-	h += "<div draggable='true' class='yang' data-id='"+m.id+"' data-name='"+m.nameval+"' data-type='"+m.type+"' >"
+	h += "<div draggable='true' class='yang' data-id='"+m.id+"'>"
 
 	// don't show removal on root module
 	m.parent && (h += "<a class='delete invisible' href='#' title='remove'>-</a> ")
@@ -632,6 +734,13 @@ function create_dom_statement(m)
 	h += ' "<span contenteditable="true" class="nameval collectable editable">' + m.nameval + '</span>"'
 
 	// there are no possible substatements close tag
+
+	if (typeof yang.statements[m.type] == "undefined")
+	{
+		console.error("statement not implemented:" + m.type + " " + m.nameval)
+		return h += "<span class='collectable break'>;</span></div>"
+	}
+
 	if (typeof yang.statements[m.type].subs == "undefined" || !yang.statements[m.type].subs.length)
 	{
 		return h += "<span class='collectable break'>;</span></div>"
@@ -643,6 +752,7 @@ function create_dom_statement(m)
 	h += "<div style='margin-left:1em'>"
 	h += "<ul data-statements class='sortable'>"
 
+	if (m.subs)
 	for (var sub in m.subs)
 	{
 		var prop=m.subs[sub]
@@ -653,7 +763,7 @@ function create_dom_statement(m)
 	}
 
 	h += "<li>"
-	h += "<a href='#' class='add invisible'>[+]</a>"
+	h += "<a href='#' class='add invisible' data-toggle='tooltip' title='"+m.type + " " + m.nameval +"'>[+]</a>"
 	h += "</li>"
 	h += "</ul>"
 	h += "<span class='collectable break'>}</span>"
@@ -673,139 +783,17 @@ function get_yang_from_dom(elem, pretty)
 	elem.find('.collectable').each(function()
 	{
 		var self = $(this)
-		var raw_text = html_to_unix(self.html().trim())
+		var raw_text = self.html().trim()
 
 		var br = pretty ? (self.hasClass('break') ? '\n' : ' ') : ' '
 
-		yang_string += self.hasClass('nameval') ? '"' + raw_text + '"' : raw_text
+		if (raw_text)
+			yang_string += self.hasClass('nameval') ? '"' + raw_text + '"' : raw_text
+
 		yang_string += br
 	})
 
 	return yang_string
-}
-
-function get_yang_list(callback)
-{
-	if (!callback)
-		return
-
-	var user_data = get_userdata()
-	if (!user_data)
-		return
-
-	var h = '<table class="files"><tr><th>Name</th><th>Actions</th></tr>'
-
-	$.getJSON('/yang/' + user_data.user + "/" + user_data.pass,
-	function(response)
-	{
-		if (!response || response.error || !response.data || !Array.isArray(response.data))
-			return console.error(response)
-
-		if (!response.data.length)
-		{
-			return callback($("<span>No files saved yet</span>"))
-		}
-
-		for (var i = 0, len = response.data.length; i < len; i++)
-		{
-			var yang_file = response.data[i]
-			h += "<tr>"
-			h += '<td data-module-name><span>' + yang_file + '</span></td>'
-			h += '<td>\
-			<button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-ok"></span> Edit</button> \
-			<button class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-remove"></span> Remove</button>'
-			h += '<td>'
-			h += "</tr>"
-		}
-
-		h += "</table>"
-
-		$h = $(h)
-		$h.on('click', '.btn-default', function()
-		{
-			var self = $(this)
-
-			var user_data = get_userdata()
-			var yang_module_name = self.closest('tr').find('[data-module-name]').text().trim()
-
-			$.getJSON('/yang/' + user_data.user + "/" + user_data.pass + "/" + yang_module_name,
-			function(response)
-			{
-				if (!response || response.error || !response.data)
-					return show_alert("unable to fetch server data")
-
-				try
-				{
-					var yang_data = JSON.parse(response.data)
-
-					yang_root = new yang.statement(yang_data.kw, yang_data.arg)
-					convert_to_structure(yang_data, yang_root)
-
-					$("#d_editor").html(create_dom_statement(yang_root))
-					hide_modal()
-				}
-				catch(e)
-				{
-					return show_alert(e)
-				}
-			})
-		})
-
-		$h.on('click', '.btn-danger', function()
-		{
-			var self = $(this)
-			if (!confirm("This can't be reverted. Are you sure?"))
-				return
-
-			var user_data = get_userdata()
-			var yang_module_name = self.closest('tr').find('[data-module-name]').text().trim()
-
-			$.ajax
-			({
-				type: 'DELETE',
-				url: '/yang/' + user_data.user + "/" + user_data.pass + "/" + yang_module_name,
-				dataType: 'json',
-				success: function(result)
-				{
-					if (!result.error)
-					{
-						var $tr = self.closest('tr')
-						var $table = $tr.closest('table')
-						if ($table.find('tr').length == 2)
-						{
-							$table.remove()
-							hide_modal()
-						}
-						else
-						{
-							$tr.remove()
-						}
-					}
-				},
-				error: function(error)
-				{
-					console.error(error)
-				}
-			})
-
-			return false
-		})
-
-		callback($h)
-	})
-}
-
-function unix_to_html(str, spaces)
-{
-	str = str.replace(/\n/g,'<br/>')
-	spaces && (str = str.replace(/ /g, '&ensp;'))
-
-	return str
-}
-
-function html_to_unix(str)
-{
-	return str.replace(/<br *\/?>/g, '\n')
 }
 
 function remove_server_path(str)
@@ -870,12 +858,8 @@ function convert_to_structure(yang_data, yang_root)
 	for (var i = 0, len = yang_data.substmts.length; i < len; i++)
 	{
 		var substatement = yang_data.substmts[i]
-		var e = yang_root.add(substatement.kw, substatement.arg)
+		var e = yang_root.add(substatement.kw, htmlentities(substatement.arg))
 		convert_to_structure(substatement, e)
 	}
 }
 
-function import_yang(yang)
-{
-
-}

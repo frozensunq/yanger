@@ -105,9 +105,6 @@ var yang = new function()
 		if (to_index == -1 || from_index == -1)
 			return
 
-		console.debug("from index:" + from_index)
-		console.debug("to index:" + to_index)
-
 		this.subs.splice(to_index, 0, this.subs.splice(from_index, 1)[0])
 	}
 
@@ -117,18 +114,29 @@ var yang = new function()
 		"type":
 		{
 			desc: "YANG type",
-			ref: "http://tools.ietf.org/html/rfc6020#page-58",
+			ref: "http://tools.ietf.org/html/rfc6020#page-18",
 			uniq:0,
 			subs:
 			[
-				"bit",
-				"enum",
-				"length",
-				"path",
-				"pattern",
-				"range",
-				"require-instance",
-				"type"
+				"binary",
+				"bits",
+				"boolean",
+				"decimal64",
+				"empty",
+				"enumeration",
+				"identityref",
+				"instance-identifier",
+				"int8",
+				"int16",
+				"int32",
+				"int64",
+				"leafref",
+				"string",
+				"uint8",
+				"uint16",
+				"uint32",
+				"uint64",
+				"union"
 			]
 		},
 
@@ -666,6 +674,42 @@ var yang = new function()
 			]
 		},
 
+		"input":
+		{
+			desc: "optional, is used to define input parameters to the RPC operation.  It does not take an argument.",
+			ref: "http://tools.ietf.org/html/rfc6020#page-88",
+			subs:
+			[
+				"anyxml",
+				"choice",
+				"container",
+				"grouping",
+				"leaf",
+				"leaf-list",
+				"list",
+				"typedef",
+				"uses"
+			]
+		},
+
+		"output":
+		{
+			desc: "optional, is used to define output parameters to the RPC operation.  It does not take an argument.",
+			ref: "http://tools.ietf.org/html/rfc6020#page-89",
+			subs:
+			[
+				"anyxml",
+				"choice",
+				"container",
+				"grouping",
+				"leaf",
+				"leaf-list",
+				"list",
+				"typedef",
+				"uses"
+			]
+		},
+
 		"notification":
 		{
 			desc: "define a NETCONF notification.",
@@ -807,6 +851,217 @@ var yang = new function()
 				"units"
 			]
 		},
+
+		"int8":
+		{
+			desc: "represents integer values between -128 and 127, inclusively.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-112"
+		},
+
+		"int16":
+		{
+			desc: "represents integer values between -32768 and 32767, inclusively.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-112"
+		},
+
+		"int32":
+		{
+			desc: "represents integer values between -2147483648 and 2147483647, inclusively.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-112"
+		},
+
+		"int64":
+		{
+			desc: "represents integer values between -9223372036854775808 and 9223372036854775807, inclusively.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-112"
+		},
+
+		"uint8":
+		{
+			desc: "represents integer values between 0 and 255, inclusively.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-112"
+		},
+
+		"uint16":
+		{
+			desc: "represents integer values between 0 and 65535, inclusively.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-112"
+		},
+
+		"uint32":
+		{
+			desc: "represents integer values between 0 and 4294967295, inclusively.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-112"
+		},
+
+		"uint64":
+		{
+			desc: "represents integer values between 0 and 18446744073709551615, inclusively.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-112"
+		},
+
+		"range":
+		{
+			desc: "used to restrict integer and decimal built-in types, or types derived from those",
+			ref: "https://tools.ietf.org/html/rfc6020#page-114",
+			subs:
+			[
+				"description",
+				"error-app-tag",
+				"error-message",
+				"reference"
+			]
+		},
+
+		"decimal64":
+		{
+			desc: "represents a subset of the real numbers, which can be represented by decimal numerals.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-114"
+		},
+
+		"fraction-digits":
+		{
+			desc: "represents a subset of the real numbers, which can be represented by decimal numerals.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-114"
+		},
+
+		"string":
+		{
+			desc: "represents human-readable strings in YANG",
+			ref: "https://tools.ietf.org/html/rfc6020#page-116"
+		},
+
+		"length":
+		{
+			desc: "optional substatement to the 'type' statement, takes as an argument a length expression string",
+			ref: "https://tools.ietf.org/html/rfc6020#page-116",
+			subs:
+			[
+				"description",
+				"error-app-tag",
+				"error-message",
+				"reference"
+			]
+		},
+
+		"pattern":
+		{
+			desc:"optional substatement to the 'type' statement, takes as an argument a regular expression string",
+			ref: "https://tools.ietf.org/html/rfc6020#page-119",
+			subs:
+			[
+				"description",
+				"error-app-tag",
+				"error-message",
+				"reference"
+			]
+		},
+
+		"boolean":
+		{
+			desc: "represents a boolean value.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-120"
+		},
+
+		"enumeration":
+		{
+			desc: "represents values from a set of assigned names.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-120"
+		},
+
+		"enum":
+		{
+			desc: "It is repeatedly used to specify each assigned name of an enumeration type",
+			ref: "https://tools.ietf.org/html/rfc6020#page-120",
+			subs:
+			[
+			 "description",
+             "reference",
+             "status",
+             "value"
+			]
+		},
+
+		"value":
+		{
+			desc: "used to associate an integer value with the assigned name for the enum",
+			ref: "https://tools.ietf.org/html/rfc6020#page-121"
+		},
+
+		"bits":
+		{
+			desc: "represents a bit set.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-121"
+		},
+
+		"bit":
+		{
+			desc: "repeatedly used to specify each assigned named bit of a bits type",
+			ref: "https://tools.ietf.org/html/rfc6020#page-122",
+			subs:
+			[
+			 "description",
+             "reference",
+             "status",
+             "position"
+			]
+		},
+
+		"position":
+		{
+			desc: "takes as an argument a non-negative integer value that specifies the bit's position within a hypothetical bit field.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-123"
+		},
+
+		"binary":
+		{
+			desc: "represents any binary data, i.e., a sequence of octets.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-123"
+		},
+
+		"leafref":
+		{
+			desc: "used to reference a particular leaf instance in the data tree.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-124"
+		},
+
+		"path":
+		{
+			desc: "takes as an argument a string that MUST refer to a leaf or leaf-list node.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-124"
+		},
+
+		"identityref":
+		{
+			desc: "used to reference an existing identity",
+			ref: "https://tools.ietf.org/html/rfc6020#page-125"
+		},
+
+		"empty":
+		{
+			desc: "represents a leaf that does not have any value, it conveys information by its presence or absence.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-131"
+		},
+
+		"union":
+		{
+			desc: "represents a value that corresponds to one of its member types.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-132"
+		},
+
+		"instance-identifier":
+		{
+			desc: "used to uniquely identify a particular instance node in the data tree.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-133"
+		},
+
+		"require-instance":
+		{
+			default: "false",
+			desc: "means that the instance being referred MUST or MAY exist in valid data.",
+			ref: "https://tools.ietf.org/html/rfc6020#page-133"
+		}
+
 	}
 
 }

@@ -5,7 +5,8 @@ online YANG editor
 
 #### Installation
     git clone https://github.com/freenetconf/yanger.git
-    cd testconf
+    cd yanger
+	export PYTHON=python2
     npm install
     ./server.js
 
@@ -39,7 +40,7 @@ Save your yang files online for later usage.
   * uniq values should be set for all statements that can hold only one specific statement inside
   * default values and possible values - some statements can only have specific values
   * extension statements - dynamically created statements are not supported
-* help: create help window for users where they can se how to use yanger
+* help: create help window for users where they can see how to use yanger
 * import/include: yang extension statements defined in other modules are not seen
 * import: depends on yang parser work
 * security, code cleanup and consolidation

@@ -8,6 +8,10 @@ online YANG editor
     cd yanger
 	export PYTHON=python2
     npm install
+
+	git clone https://gitlab.labs.nic.cz/labs/yang-tools.git
+	cp -r yang-tools/coffee-parser/ node_modules/
+
     ./server.js
 
 #### Usage

@@ -30,4 +30,4 @@ series
 # ctags
 tags
 node_modules/*
-!node_modules/coffe-parser/
+!node_modules/coffe-parser*

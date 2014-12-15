@@ -118,25 +118,14 @@ var yang = new function()
 			uniq:0,
 			subs:
 			[
-				"binary",
-				"bits",
-				"boolean",
-				"decimal64",
-				"empty",
-				"enumeration",
-				"identityref",
-				"instance-identifier",
-				"int8",
-				"int16",
-				"int32",
-				"int64",
-				"leafref",
-				"string",
-				"uint8",
-				"uint16",
-				"uint32",
-				"uint64",
-				"union"
+				"bit",
+				"enum",
+				"length",
+				"path",
+				"pattern",
+				"range",
+				"require-instance",
+				"type"
 			]
 		},
 

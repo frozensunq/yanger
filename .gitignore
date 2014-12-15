@@ -31,3 +31,6 @@ series
 tags
 node_modules/*
 !node_modules/coffe-parser*
+
+public/main.js
+public/main.css
